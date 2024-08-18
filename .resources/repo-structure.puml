@@ -1,0 +1,32 @@
+@startuml repo-structure
+
+skinparam component {
+    BackgroundColor<<external>> White
+    BackgroundColor<<executable>> #ccffcc
+    BackgroundColor<<test>> cyan
+}
+skinparam DatabaseBackgroundColor LightYellow
+skinparam NodeBackgroundColor White
+
+component ":location-service" {
+    [:commons] as C
+    [:domain] as D
+    [:application] as A
+
+    [:presentation] as P
+    [io.circe:circe-core_3] as circe <<external>>
+    [io.grpc-*] as grpc <<external>>
+
+    [:infrastructure] as I
+    [org.http4s:http4s-*] as http4s <<external>>
+
+    D -up-|> C
+    A -up-|> D
+    P -up-|> A
+    circe <|-left- P
+    grpc <|-right- P
+    I -up-|> P
+    http4s <|- I
+}
+
+@enduml

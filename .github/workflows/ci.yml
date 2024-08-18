@@ -12,6 +12,8 @@ jobs:
         jvm-version: [ 11, 17, 21 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    env:
+      MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
