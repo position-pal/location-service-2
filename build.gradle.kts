@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.scala.extras)
 }
 
-data class DotenvConfiguration(val fileName: String = DEFAULT_ENV_FILE_NAME) {
+class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) {
 
     fun environmentVariables(): Map<String, String> =
         rootDir.resolve(dotenv.fileName)
