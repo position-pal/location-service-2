@@ -2,15 +2,31 @@
 scala = "3.5.0"
 scalatest = "3.3.0-SNAP4"
 junit = "1.11.0"
+circe = "0.14.9"
+http4s = "1.0.0-M41"
 
 [libraries]
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
+cats-core = "org.typelevel:cats-core_3:2.12.0"
+cats-effect = "org.typelevel:cats-effect_3:3.5.4"
+cats-mtl = "org.typelevel:cats-mtl_3:1.4.0"
+http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
+http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
+http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
+http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }
+circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
+circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
+circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
+log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 [bundles]
+cats = [ "cats-core", "cats-effect", "cats-mtl" ]
+circe = [ "circe-core", "circe-generic", "circe-parser" ]
+http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
 scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher", "scalatestplus-junit5" ]
 
 [plugins]
