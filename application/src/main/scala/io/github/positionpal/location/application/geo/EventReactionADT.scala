@@ -19,8 +19,8 @@ trait EventReactionADT:
 
   import cats.data.ReaderT
 
-  /** A computational reaction to an [[Event]] within a given [[Environment]], abstracted over an effect `F`
-    * that represents the context in which the reaction computation occurs (e.g., `IO`, `Task`, etc.).
+  /** A computational reaction to an [[Event]] within a given [[Environment]],
+    * abstracted over an effect `F` (e.g., `IO`, `Task`, etc.).
     */
   opaque type EventReaction[F[_]] = ReaderT[F, (Environment, Event), Outcome]
 
@@ -54,8 +54,12 @@ trait EventReactionADT:
   * first failure.
   */
 trait BinaryShortCircuitReaction extends EventReactionADT:
+  /** The type of the left outcome, representing a failure. */
   type LeftOutcome
+
+  /** The type of the right outcome, representing a success. */
   type RightOutcome
+
   override type Outcome = Either[LeftOutcome, RightOutcome]
 
   import cats.implicits.toFlatMapOps
