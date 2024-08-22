@@ -1,3 +1,17 @@
+## 1.0.0 (2024-08-22)
+
+### Features
+
+* **maps:** add maps service and associated domain models ([#3](https://github.com/position-pal/location-service/issues/3)) ([1539f34](https://github.com/position-pal/location-service/commit/1539f34cc281131a1c39dccc23dbb83a440c4a32))
+
+### Dependency updates
+
+* **deps:** update dependency org.typelevel:cats-effect_3 to v3.5-6581dc4 ([11e2fd4](https://github.com/position-pal/location-service/commit/11e2fd4a4f223aa28c09a773c89a5e897d6a940d))
+
+### General maintenance
+
+* add .env file to gitignore ([fa8ec09](https://github.com/position-pal/location-service/commit/fa8ec097ffeda1caee8c085f72f907f55546533d))
+
 ## 1.0.0 (2024-07-10)
 
 ### Features
