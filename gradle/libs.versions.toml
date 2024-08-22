@@ -31,3 +31,4 @@ scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher
 
 [plugins]
 scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.0"
+akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"

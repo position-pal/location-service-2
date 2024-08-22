@@ -31,11 +31,15 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = "java-library")
         apply(plugin = "scala")
-        apply(plugin = scala.extras.get().pluginId)
+        // TODO: generated code by protobuf should be excluded from qa checks
+        if (name != "presentation") {
+            apply(plugin = scala.extras.get().pluginId)
+        }
     }
 
     repositories {
         mavenCentral()
+        maven { url = uri("https://repo.akka.io/maven") }
     }
 
     with(rootProject.libs) {
