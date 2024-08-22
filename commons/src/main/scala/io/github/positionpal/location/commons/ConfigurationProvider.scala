@@ -1,13 +1,13 @@
 package io.github.positionpal.location.commons
 
-import cats.effect.IO
+import cats.effect.Sync
 
 /** A generic provider of configuration [[C]]. */
-trait ConfigurationProvider[C]:
+trait ConfigurationProvider[F[_], C]:
 
   /** @return an effectful computation providing the configuration [[C]]. */
-  def configuration: IO[C]
+  def configuration: F[C]
 
 /** A provider of environment variables. */
-object EnvVariablesProvider extends ConfigurationProvider[Map[String, String]]:
-  def configuration: IO[Map[String, String]] = IO(sys.env)
+class EnvVariablesProvider[F[_]: Sync] extends ConfigurationProvider[F, Map[String, String]]:
+  def configuration: F[Map[String, String]] = Sync[F].delay(sys.env)

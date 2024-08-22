@@ -24,7 +24,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
   describe("The Mapbox service adapter"):
     it("should calculate the distance between two locations"):
       val distanceRequest = for
-        envs <- EnvVariablesProvider.configuration
+        envs <- EnvVariablesProvider[IO].configuration
         config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
         distance <- mapboxServiceAdapter.distance(Driving)(cesenaCampus, bolognaCampus).value.run(config)
       yield distance
@@ -35,7 +35,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
 
     it("should calculate the arrival time between two locations"):
       val arrivalTimeRequest = for
-        envs <- EnvVariablesProvider.configuration
+        envs <- EnvVariablesProvider[IO].configuration
         config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
         arrivalTime <- mapboxServiceAdapter.duration(Driving)(cesenaCampus, bolognaCampus).value.run(config)
       yield arrivalTime
