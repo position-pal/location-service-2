@@ -10,8 +10,8 @@ trait Route:
   /** @return the list of positions of the route. */
   def positions: List[GPSLocation]
 
-  /** @return a new route whose [[positions]] are the concatenation of this route's and the given [[route]]'s. */
-  @targetName("addSample") def +(route: Route): Route
+  /** @return a new route whose [[positions]] have been prepended the given [[sample]]. */
+  @targetName("addSample") def +(sample: GPSLocation): Route
 
 object Route:
   def apply(event: DrivingEvents.StartRoutingEvent): Route = RouteImpl(event, List())
@@ -24,5 +24,5 @@ object Route:
       positions: List[GPSLocation],
   ) extends Route:
     @targetName("addSample")
-    override def +(route: Route): Route =
-      withInitialPositions(event, positions ++ route.positions)
+    override def +(sample: GPSLocation): Route =
+      withInitialPositions(event, sample +: positions)
