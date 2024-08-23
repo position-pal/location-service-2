@@ -1,4 +1,4 @@
-package io.github.positionpal.location.application.geo
+package io.github.positionpal.location.application.reactions
 
 import scala.annotation.targetName
 

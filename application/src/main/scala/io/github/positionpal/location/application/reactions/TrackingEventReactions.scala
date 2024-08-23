@@ -1,6 +1,7 @@
-package io.github.positionpal.location.application.geo
+package io.github.positionpal.location.application.reactions
 
 import io.github.positionpal.location.application.geo.RoutingMode.Driving
+import io.github.positionpal.location.application.geo.{Distance, MapsService}
 import io.github.positionpal.location.domain.{DrivingEvents, Route}
 
 /** A reaction to [[DrivingEvents.TrackingEvent]]s. */
@@ -15,9 +16,9 @@ object TrackingEventReaction extends BinaryShortCircuitReaction:
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is near the arrival position. */
 object IsArrivedCheck:
+  import TrackingEventReaction.*
   import cats.effect.Async
   import cats.implicits.toFunctorOps
-  import TrackingEventReaction.*
   import io.github.positionpal.location.application.geo.Distance.*
 
   private val arrivalThreshold = 50.meters

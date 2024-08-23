@@ -4,13 +4,8 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.geo.Distance.DistanceUnit
 import io.github.positionpal.location.application.geo.RoutingMode.Driving
-import io.github.positionpal.location.application.geo.{
-  Distance,
-  IsArrivedCheck,
-  IsContinuallyInSameLocationCheck,
-  MapsServiceError,
-  RoutingMode,
-}
+import io.github.positionpal.location.application.geo.{Distance, MapsServiceError, RoutingMode}
+import io.github.positionpal.location.application.reactions.{IsArrivedCheck, IsContinuallyInSameLocationCheck}
 import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.GPSLocation
 import org.http4s.ember.client.EmberClientBuilder
