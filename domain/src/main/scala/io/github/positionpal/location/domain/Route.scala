@@ -26,7 +26,7 @@ object Route:
   def apply(event: StartRoutingEvent, expectedArrivalTime: Date): Route =
     RouteImpl(event, expectedArrivalTime, List())
 
-  private def withPositions(event: StartRoutingEvent, expectedArrivalTime: Date, positions: List[GPSLocation]): Route =
+  def withPositions(event: StartRoutingEvent, expectedArrivalTime: Date, positions: List[GPSLocation]): Route =
     RouteImpl(event, expectedArrivalTime, positions)
 
   private case class RouteImpl(

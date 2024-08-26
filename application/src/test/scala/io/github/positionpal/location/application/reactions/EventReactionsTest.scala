@@ -3,7 +3,7 @@ package io.github.positionpal.location.application.reactions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
+class EventReactionsTest extends AnyFunSpec with Matchers:
 
   import TrackingEventReaction.*
   import Notification.Alert
@@ -11,11 +11,11 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
   import cats.effect.unsafe.implicits.global
   import io.github.positionpal.location.domain.DrivingEvents.{TrackingEvent, StartRoutingEvent}
   import io.github.positionpal.location.domain.{DrivingEvents, GPSLocation, Route, UserId, RoutingMode}
+  import io.github.positionpal.location.domain.RoutingMode.Driving
 
   import java.util.Date
 
-  private val route =
-    Route(StartRoutingEvent(Date(), UserId("test"), RoutingMode.Driving, GPSLocation(0.0, 0.0)), Date())
+  private val route = Route(StartRoutingEvent(Date(), UserId("test"), Driving, GPSLocation(0.0, 0.0)), Date())
   private val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), GPSLocation(0.1, 0.1))
 
   describe("`TrackingEventReaction`s"):

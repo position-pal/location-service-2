@@ -4,7 +4,6 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.geo.Distance.DistanceUnit
 import io.github.positionpal.location.application.geo.{Distance, MapsServiceError}
-import io.github.positionpal.location.application.reactions.{IsArrivedCheck, IsContinuallyInSameLocationCheck}
 import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.domain.{GPSLocation, RoutingMode}
@@ -43,23 +42,3 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
       val result = arrivalTimeRequest.unsafeRunSync()
       result.isRight shouldBe true
       result.map(_.toMinutes should (be >= 60L))
-
-  describe("Trying to instantiate a check with maps service"):
-    it("should work"):
-      import java.util.Date
-      import io.github.positionpal.location.domain.*
-      import io.github.positionpal.location.domain.DrivingEvents.*
-
-      val route =
-        Route(DrivingEvents.StartRoutingEvent(Date(), UserId("test"), RoutingMode.Driving, cesenaCampus), Date())
-      val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), bolognaCampus)
-      val check1 = IsArrivedCheck[Response](mapboxServiceAdapter)
-      val check2 = IsContinuallyInSameLocationCheck[Response]()
-      val composed = check1.>>>(check2)
-      val outcome = for
-        envs <- EnvVariablesProvider[IO].configuration
-        config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
-        result <- composed(route, event).value.run(config)
-      yield result
-      val result = outcome.unsafeRunSync().flatten
-      println(result)

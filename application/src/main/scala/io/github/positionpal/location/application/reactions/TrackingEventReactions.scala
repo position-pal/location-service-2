@@ -43,7 +43,7 @@ object IsContinuallyInSameLocationCheck:
   import cats.Monad
 
   private val samplingWindow = 5
-  private val alertMessage = "User is stuck in the same position for too long"
+  private val alertMessage = "User is stuck in the same position for a while."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
     val samples = route.positions.take(samplingWindow)
@@ -56,7 +56,7 @@ object IsArrivalTimeExpiredCheck:
   import TrackingEventReaction.*
   import Notification.Alert
 
-  private val alertMessage = "User has not yet reached the destination within the expected time"
+  private val alertMessage = "User has not reached the destination within the expected time."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
     if event.timestamp.after(route.expectedArrivalTime)
