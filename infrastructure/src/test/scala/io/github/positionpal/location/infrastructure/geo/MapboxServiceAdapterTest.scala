@@ -5,21 +5,14 @@ import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.geo.Distance.DistanceUnit
 import io.github.positionpal.location.application.geo.{Distance, MapsServiceError}
 import io.github.positionpal.location.commons.EnvVariablesProvider
+import io.github.positionpal.location.domain.RoutingMode
 import io.github.positionpal.location.domain.RoutingMode.Driving
-import io.github.positionpal.location.domain.{GPSLocation, RoutingMode}
-import org.http4s.ember.client.EmberClientBuilder
+import io.github.positionpal.location.infrastructure.utils.*
+import io.github.positionpal.location.infrastructure.utils.MapboxServiceAdapterUtils.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.typelevel.log4cats.LoggerFactory
-import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
-  private val cesenaCampus = GPSLocation(44.1476299926484, 12.2357184467018)
-  private val bolognaCampus = GPSLocation(44.487912, 11.32885)
-  private val mapboxServiceAdapter = MapboxServiceAdapter()
-
-  private given LoggerFactory[IO] = Slf4jFactory.create[IO]
-  private val clientResource = EmberClientBuilder.default[IO].build
 
   describe("The Mapbox service adapter"):
     it("should calculate the distance between two locations"):
