@@ -15,6 +15,8 @@ object TrackingEventReaction extends BinaryShortCircuitReaction:
   override type RightOutcome = Continue.type
 
 import cats.Monad
+import cats.effect.Sync
+import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import TrackingEventReaction.*
 import Notification.*
@@ -24,29 +26,32 @@ object IsArrivedCheck:
   import io.github.positionpal.location.application.geo.Distance.*
   import io.github.positionpal.location.application.geo.MapsService
 
-  private val distanceThreshold = 50.meters
   private val successMessage = "User has arrived to the expected destination in time!"
 
-  def apply[M[_]: Monad](mapsService: MapsService[M]): EventReaction[M] =
+  def apply[M[_]: Sync: Monad](mapsService: MapsService[M]): EventReaction[M] =
     on[M]: (route, event) =>
       for
+        config <- ReactionsConfiguration.get
         distance <- mapsService.distance(route.sourceEvent.mode)(event.position, route.sourceEvent.arrivalPosition)
         outcome =
-          if distance.toMeters.value <= distanceThreshold.toMeters.value
+          if distance.toMeters.value <= config.distanceThreshold.meters.value
           then Left(Success(successMessage))
           else Right(Continue)
       yield outcome
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
 object IsContinuallyInSameLocationCheck:
-  private val samplingWindow = 5
   private val alertMessage = "User is stuck in the same position for a while."
 
-  def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
-    val samples = route.positions.take(samplingWindow)
-    if samples.size >= samplingWindow && samples.forall(_ == event.position)
-    then Monad[M].pure(Left(Alert(alertMessage)))
-    else Monad[M].pure(Right(Continue))
+  def apply[M[_]: Sync: Monad](): EventReaction[M] = on[M]: (route, event) =>
+    for
+      config <- ReactionsConfiguration.get
+      samples = route.positions.take(config.stationarySamplesThreshold)
+      result <-
+        if samples.size >= config.stationarySamplesThreshold && samples.forall(_ == event.position)
+        then Monad[M].pure(Left(Alert(alertMessage)))
+        else Monad[M].pure(Right(Continue))
+    yield result
 
 /** A [[TrackingEventReaction]] checking if the expected arrival time has expired. */
 object IsArrivalTimeExpiredCheck:

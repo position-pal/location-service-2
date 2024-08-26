@@ -5,6 +5,7 @@ junit = "1.11.0"
 circe = "0.14.9"
 http4s = "1.0.0-M41"
 scalamock = "0.6.0"
+pureconfig = "0.17.7"
 
 [libraries]
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
@@ -18,6 +19,8 @@ http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }
 circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
 circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
 circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
+pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
+pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
@@ -30,7 +33,15 @@ scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]
 circe = [ "circe-core", "circe-generic", "circe-parser" ]
 http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
-scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher", "scalatestplus-junit5", "scalamock", "scalamock-test" ]
+pureconfig = [ "pureconfig-core", "pureconfig-cats-effect" ]
+scala-testing = [
+    "scalatest",
+    "junit-platform-engine",
+    "junit-platform-launcher",
+    "scalatestplus-junit5",
+    "scalamock",
+    "scalamock-test"
+]
 
 [plugins]
 akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
