@@ -51,8 +51,8 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
       import io.github.positionpal.location.domain.DrivingEvents.*
 
       val route =
-        Route(DrivingEvents.StartRoutingEvent(Date(), UserId("test"), RoutingMode.Driving, GPSLocation(0.0, 0.0)))
-      val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), GPSLocation(0.1, 0.1))
+        Route(DrivingEvents.StartRoutingEvent(Date(), UserId("test"), RoutingMode.Driving, cesenaCampus), Date())
+      val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), bolognaCampus)
       val check1 = IsArrivedCheck[Response](mapboxServiceAdapter)
       val check2 = IsContinuallyInSameLocationCheck[Response]()
       val composed = check1.>>>(check2)
@@ -61,4 +61,5 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
         config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
         result <- composed(route, event).value.run(config)
       yield result
-      println(outcome.unsafeRunSync().flatten)
+      val result = outcome.unsafeRunSync().flatten
+      println(result)
