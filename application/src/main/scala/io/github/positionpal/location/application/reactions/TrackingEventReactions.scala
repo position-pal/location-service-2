@@ -1,6 +1,5 @@
 package io.github.positionpal.location.application.reactions
 
-import cats.Monad
 import io.github.positionpal.location.domain.{DrivingEvents, Route}
 
 /** A reaction to [[DrivingEvents.TrackingEvent]]s. */
@@ -15,11 +14,13 @@ object TrackingEventReaction extends BinaryShortCircuitReaction:
   override type LeftOutcome = Notification
   override type RightOutcome = Continue.type
 
+import cats.Monad
+import cats.implicits.toFunctorOps
+import TrackingEventReaction.*
+import Notification.*
+
 /** A [[TrackingEventReaction]] checking if the position curried by the event is near the arrival position. */
 object IsArrivedCheck:
-  import TrackingEventReaction.*
-  import Notification.Success
-  import cats.implicits.toFunctorOps
   import io.github.positionpal.location.application.geo.Distance.*
   import io.github.positionpal.location.application.geo.MapsService
 
@@ -38,10 +39,6 @@ object IsArrivedCheck:
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
 object IsContinuallyInSameLocationCheck:
-  import TrackingEventReaction.*
-  import Notification.Alert
-  import cats.Monad
-
   private val samplingWindow = 5
   private val alertMessage = "User is stuck in the same position for a while."
 
@@ -53,9 +50,6 @@ object IsContinuallyInSameLocationCheck:
 
 /** A [[TrackingEventReaction]] checking if the expected arrival time has expired. */
 object IsArrivalTimeExpiredCheck:
-  import TrackingEventReaction.*
-  import Notification.Alert
-
   private val alertMessage = "User has not reached the destination within the expected time."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
