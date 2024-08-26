@@ -5,7 +5,7 @@ import scala.annotation.targetName
 /** The route followed by a [[User]] while going from one place to another. */
 trait Route:
   /** @return the [[DrivingEvents.StartRoutingEvent]] originating the route. */
-  def event: DrivingEvents.StartRoutingEvent
+  def sourceEvent: DrivingEvents.StartRoutingEvent
 
   /** @return the list of positions of the route. */
   def positions: List[GPSLocation]
@@ -20,9 +20,13 @@ object Route:
     RouteImpl(event, positions)
 
   private case class RouteImpl(
-      event: DrivingEvents.StartRoutingEvent,
+      sourceEvent: DrivingEvents.StartRoutingEvent,
       positions: List[GPSLocation],
   ) extends Route:
     @targetName("addSample")
     override def +(sample: GPSLocation): Route =
-      withInitialPositions(event, sample +: positions)
+      withInitialPositions(sourceEvent, sample +: positions)
+
+/** The mode of routing to a destination. */
+enum RoutingMode:
+  case Driving, Walking, Cycling

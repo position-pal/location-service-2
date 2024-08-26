@@ -12,6 +12,7 @@ enum DrivingEvents:
   case StartRoutingEvent(
       timestamp: Date,
       user: UserId,
+      mode: RoutingMode,
       arrivalPosition: GPSLocation,
   ) extends DrivingEvents
 

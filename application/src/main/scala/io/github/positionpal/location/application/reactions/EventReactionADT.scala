@@ -3,7 +3,6 @@ package io.github.positionpal.location.application.reactions
 import scala.annotation.targetName
 
 import cats.Monad
-import cats.effect.Async
 import io.github.positionpal.location.domain.DrivingEvents
 
 /** An abstract data type for effectful event reactions. */
@@ -29,9 +28,9 @@ trait EventReactionADT:
     *           non-blocking computations, such as interacting with an API or a database.
     * @return the created [[EventReaction]].
     */
-  def on[F[_]: Async](reaction: ((Environment, Event)) => F[Outcome]): EventReaction[F] = ReaderT(reaction)
+  def on[F[_]](reaction: ((Environment, Event)) => F[Outcome]): EventReaction[F] = ReaderT(reaction)
 
-  extension [F[_]: Async](reaction: EventReaction[F])
+  extension [F[_]: Monad](reaction: EventReaction[F])
     /** Executes the event reaction by applying the provided [[environment]] and [[event]], resulting
       * in an [[Outcome]] wrapped in the effect type `F[_]`. The computation is deferred and executed
       * within the effect context.
@@ -64,7 +63,7 @@ trait BinaryShortCircuitReaction extends EventReactionADT:
 
   import cats.implicits.toFlatMapOps
 
-  extension [F[_]: Async](reaction: EventReaction[F])
+  extension [F[_]: Monad](reaction: EventReaction[F])
     @targetName("andThen")
     def >>>(other: EventReaction[F]): EventReaction[F] = on: (env, event) =>
       reaction(env, event).flatMap:

@@ -3,11 +3,11 @@ package io.github.positionpal.location.infrastructure.geo
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.geo.Distance.DistanceUnit
-import io.github.positionpal.location.application.geo.RoutingMode.Driving
-import io.github.positionpal.location.application.geo.{Distance, MapsServiceError, RoutingMode}
+import io.github.positionpal.location.application.geo.{Distance, MapsServiceError}
 import io.github.positionpal.location.application.reactions.{IsArrivedCheck, IsContinuallyInSameLocationCheck}
 import io.github.positionpal.location.commons.EnvVariablesProvider
-import io.github.positionpal.location.domain.GPSLocation
+import io.github.positionpal.location.domain.RoutingMode.Driving
+import io.github.positionpal.location.domain.{GPSLocation, RoutingMode}
 import org.http4s.ember.client.EmberClientBuilder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -50,7 +50,8 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
       import io.github.positionpal.location.domain.*
       import io.github.positionpal.location.domain.DrivingEvents.*
 
-      val route = Route(DrivingEvents.StartRoutingEvent(Date(), UserId("test"), GPSLocation(0.0, 0.0)))
+      val route =
+        Route(DrivingEvents.StartRoutingEvent(Date(), UserId("test"), RoutingMode.Driving, GPSLocation(0.0, 0.0)))
       val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), GPSLocation(0.1, 0.1))
       val check1 = IsArrivedCheck[Response](mapboxServiceAdapter)
       val check2 = IsContinuallyInSameLocationCheck[Response]()
