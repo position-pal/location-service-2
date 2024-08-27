@@ -24,8 +24,7 @@ trait EventReactionADT:
   opaque type EventReaction[F[_]] = ReaderT[F, (Environment, Event), Outcome]
 
   /** Creates an [[EventReaction]] from the provided effectful [[reaction]] function.
-    * @tparam F the effect type of the reaction, constrained by [[Async]] to support asynchronous,
-    *           non-blocking computations, such as interacting with an API or a database.
+    * @tparam F the effect type of the reaction.
     * @return the created [[EventReaction]].
     */
   def on[F[_]](reaction: ((Environment, Event)) => F[Outcome]): EventReaction[F] = ReaderT(reaction)
