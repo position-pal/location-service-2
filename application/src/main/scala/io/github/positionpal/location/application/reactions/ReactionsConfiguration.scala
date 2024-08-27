@@ -1,6 +1,10 @@
 package io.github.positionpal.location.application.reactions
 
-private case class ReactionsConfiguration(distanceThreshold: Double, stationarySamplesThreshold: Int)
+/** Configuration for reactions.
+  * @param proximityThreshold the distance threshold, expressed in meters, to consider two positions near each other
+  * @param stationarySamplesThreshold the number of samples to trigger an alert if the position is stationary
+  */
+private case class ReactionsConfiguration(proximityThreshold: Double, stationarySamplesThreshold: Int)
 
 object ReactionsConfiguration:
   import cats.effect.Sync
@@ -10,7 +14,7 @@ object ReactionsConfiguration:
   private val namespace = "reactions"
 
   implicit val reader: ConfigReader[ReactionsConfiguration] =
-    ConfigReader.forProduct2("distanceThreshold", "stationarySamplesThreshold")(ReactionsConfiguration.apply)
+    ConfigReader.forProduct2("proximityThreshold", "stationarySamplesThreshold")(ReactionsConfiguration.apply)
 
   def get[M[_]: Sync]: M[ReactionsConfiguration] =
     ConfigProvider[M, ReactionsConfiguration](namespace = namespace).configuration

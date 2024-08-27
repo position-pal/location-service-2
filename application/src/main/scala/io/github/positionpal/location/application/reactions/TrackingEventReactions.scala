@@ -26,7 +26,7 @@ object IsArrivedCheck:
   import io.github.positionpal.location.application.geo.Distance.*
   import io.github.positionpal.location.application.geo.MapsService
 
-  private val successMessage = "User has arrived to the expected destination in time!"
+  private val successMessage = "User has arrived at the expected destination on time!"
 
   def apply[M[_]: Sync: Monad](mapsService: MapsService[M]): EventReaction[M] =
     on[M]: (route, event) =>
@@ -34,14 +34,14 @@ object IsArrivedCheck:
         config <- ReactionsConfiguration.get
         distance <- mapsService.distance(route.sourceEvent.mode)(event.position, route.sourceEvent.arrivalPosition)
         outcome =
-          if distance.toMeters.value <= config.distanceThreshold.meters.value
+          if distance.toMeters.value <= config.proximityThreshold.meters.value
           then Left(Success(successMessage))
           else Right(Continue)
       yield outcome
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
 object IsContinuallyInSameLocationCheck:
-  private val alertMessage = "User is stuck in the same position for a while."
+  private val alertMessage = "The user has been stuck in the same position for a while."
 
   def apply[M[_]: Sync: Monad](): EventReaction[M] = on[M]: (route, event) =>
     for
