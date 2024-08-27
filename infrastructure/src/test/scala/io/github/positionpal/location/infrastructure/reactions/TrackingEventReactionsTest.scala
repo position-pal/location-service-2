@@ -6,9 +6,9 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.{Continue, Notification}
 import io.github.positionpal.location.application.reactions.{
-  IsArrivalTimeExpiredCheck,
-  IsArrivedCheck,
-  IsContinuallyInSameLocationCheck,
+  ArrivalCheck,
+  ArrivalTimeoutCheck,
+  StationaryCheck,
   TrackingEventReaction,
 }
 import io.github.positionpal.location.commons.EnvVariablesProvider
@@ -53,9 +53,9 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
     for
       envs <- EnvVariablesProvider[IO].configuration
       config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
-      check1 = IsArrivedCheck[Response](mapboxServiceAdapter)
-      check2 = IsContinuallyInSameLocationCheck[Response]()
-      check3 = IsArrivalTimeExpiredCheck[Response]()
+      check1 = ArrivalCheck[Response](mapboxServiceAdapter)
+      check2 = StationaryCheck[Response]()
+      check3 = ArrivalTimeoutCheck[Response]()
       composed = check1 >>> check2 >>> check3
       result <- composed(route, event).value.run(config)
     yield result

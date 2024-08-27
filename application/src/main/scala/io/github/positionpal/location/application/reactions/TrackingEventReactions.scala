@@ -22,7 +22,7 @@ import TrackingEventReaction.*
 import Notification.*
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is near the arrival position. */
-object IsArrivedCheck:
+object ArrivalCheck:
   import io.github.positionpal.location.application.geo.Distance.*
   import io.github.positionpal.location.application.geo.MapsService
 
@@ -40,7 +40,7 @@ object IsArrivedCheck:
       yield outcome
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
-object IsContinuallyInSameLocationCheck:
+object StationaryCheck:
   private val alertMessage = "The user has been stuck in the same position for a while."
 
   def apply[M[_]: Sync: Monad](): EventReaction[M] = on[M]: (route, event) =>
@@ -54,7 +54,7 @@ object IsContinuallyInSameLocationCheck:
     yield result
 
 /** A [[TrackingEventReaction]] checking if the expected arrival time has expired. */
-object IsArrivalTimeExpiredCheck:
+object ArrivalTimeoutCheck:
   private val alertMessage = "User has not reached the destination within the expected time."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
