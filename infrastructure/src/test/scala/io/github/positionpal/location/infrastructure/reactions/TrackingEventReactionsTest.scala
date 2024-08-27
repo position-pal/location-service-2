@@ -53,8 +53,8 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
     for
       envs <- EnvVariablesProvider[IO].configuration
       config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
-      composed = ArrivalCheck(mapboxServiceAdapter) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
-      result <- composed(route, event).value.run(config)
+      check = ArrivalCheck(mapboxServiceAdapter) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
+      result <- check(route, event).value.run(config)
     yield result
 
   private def now: Date = Date()
