@@ -34,7 +34,7 @@ object ArrivalCheck:
         config <- ReactionsConfiguration.get
         distance <- mapsService.distance(route.sourceEvent.mode)(event.position, route.sourceEvent.arrivalPosition)
         outcome =
-          if distance.toMeters.value <= config.proximityThreshold.meters.value
+          if distance.toMeters.value <= config.proximityToleranceMeters.meters.value
           then Left(Success(successMessage))
           else Right(Continue)
       yield outcome
@@ -46,9 +46,9 @@ object StationaryCheck:
   def apply[M[_]: Sync: Monad](): EventReaction[M] = on[M]: (route, event) =>
     for
       config <- ReactionsConfiguration.get
-      samples = route.positions.take(config.stationarySamplesThreshold)
+      samples = route.positions.take(config.stationarySamples)
       result <-
-        if samples.size >= config.stationarySamplesThreshold && samples.forall(_ == event.position)
+        if samples.size >= config.stationarySamples && samples.forall(_ == event.position)
         then Monad[M].pure(Left(Alert(alertMessage)))
         else Monad[M].pure(Right(Continue))
     yield result
