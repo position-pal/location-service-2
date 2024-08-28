@@ -30,4 +30,4 @@ http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-c
 scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher", "scalatestplus-junit5" ]
 
 [plugins]
-scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.0"
+scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
