@@ -1,3 +1,26 @@
+## [0.2.0](https://github.com/position-pal/location-service/compare/0.1.0...0.2.0) (2024-08-29)
+
+### Features
+
+* **maps:** add maps service and associated domain models ([#3](https://github.com/position-pal/location-service/issues/3)) ([1539f34](https://github.com/position-pal/location-service/commit/1539f34cc281131a1c39dccc23dbb83a440c4a32))
+
+### Dependency updates
+
+* **deps:** update dependency org.typelevel:cats-effect_3 to v3.5-6581dc4 ([11e2fd4](https://github.com/position-pal/location-service/commit/11e2fd4a4f223aa28c09a773c89a5e897d6a940d))
+* **deps:** update dependency org.typelevel:cats-effect_3 to v3.6-623178c ([f983b9e](https://github.com/position-pal/location-service/commit/f983b9ee46cf1f61d5a246a0e024967552cfe15e))
+* **deps:** update dependency org.typelevel:cats-mtl_3 to v1.5.0 ([d2a9b25](https://github.com/position-pal/location-service/commit/d2a9b25cc5e445b222b4b78d36c0f7131a2a9a7f))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.100 ([59500b0](https://github.com/position-pal/location-service/commit/59500b035ac5796df25e6fe609fa175db0e83070))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.101 ([e7468fc](https://github.com/position-pal/location-service/commit/e7468fc2d47a6afbe81d96e89784904349cf65ff))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.98 ([5f88a85](https://github.com/position-pal/location-service/commit/5f88a855d6a30b548748e62ca479fa90da813127))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.99 ([b8e637e](https://github.com/position-pal/location-service/commit/b8e637e9b1deab9b4e08241f5831223de01b8840))
+* **deps:** update node.js to 20.17 ([d180488](https://github.com/position-pal/location-service/commit/d180488321a38d38eddecae1cbf2ac478e983a0c))
+* **deps:** update plugin scala-extras to v2.1.1 ([39efceb](https://github.com/position-pal/location-service/commit/39efcebe52851dabb391ba942a74317c376021bc))
+
+### General maintenance
+
+* add .env file to gitignore ([fa8ec09](https://github.com/position-pal/location-service/commit/fa8ec097ffeda1caee8c085f72f907f55546533d))
+* **release:** 1.0.0 [skip ci] ([1c54050](https://github.com/position-pal/location-service/commit/1c54050bb7a9f25420769c97d53144d00a56e741)), closes [#3](https://github.com/position-pal/location-service/issues/3)
+
 ## 1.0.0 (2024-08-22)
 
 ### Features
