@@ -8,8 +8,8 @@ http4s = "1.0.0-M41"
 [libraries]
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
 cats-core = "org.typelevel:cats-core_3:2.12.0"
-cats-effect = "org.typelevel:cats-effect_3:3.5.4"
-cats-mtl = "org.typelevel:cats-mtl_3:1.4.0"
+cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
+cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
 http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
 http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
@@ -30,5 +30,5 @@ http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-c
 scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher", "scalatestplus-junit5" ]
 
 [plugins]
-scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.0"
 akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
+scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
