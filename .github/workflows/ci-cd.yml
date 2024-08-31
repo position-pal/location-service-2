@@ -1,0 +1,20 @@
+name: CI/CD
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.mergify.yml'
+      - 'renovate.json'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ci-cd:
+    uses: position-pal/ci-cd/.github/workflows/dispatcher.yml@main
+    with:
+      ci_envs: |
+        MAPBOX_API_KEY
