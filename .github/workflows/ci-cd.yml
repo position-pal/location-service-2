@@ -18,3 +18,4 @@ jobs:
     with:
       ci_envs: |
         MAPBOX_API_KEY
+    secrets: inherit
