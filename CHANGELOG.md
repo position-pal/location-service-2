@@ -1,3 +1,18 @@
+## [0.3.0](https://github.com/position-pal/location-service/compare/0.2.0...0.3.0) (2024-09-03)
+
+### Features
+
+* **routes:** add routes and events reaction mechanism ([#11](https://github.com/position-pal/location-service/issues/11)) ([32e34a1](https://github.com/position-pal/location-service/commit/32e34a1ea7c9db01cab27d4303720613e62569b9))
+
+### Dependency updates
+
+* **deps:** update plugin com.gradle.develocity to v3.18 ([2e1c51b](https://github.com/position-pal/location-service/commit/2e1c51b1be0f211367b9e2e534693fdf86d8b202))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.9 ([88e0163](https://github.com/position-pal/location-service/commit/88e016315d660a1e5c0e8295e36530cba97ae0bd))
+
+### Build and continuous integration
+
+* **presentation:** configure akka grpc ([c98d676](https://github.com/position-pal/location-service/commit/c98d676584b2357cd20d8e26f2b9276b324f7bef))
+
 ## [0.2.0](https://github.com/position-pal/location-service/compare/0.1.0...0.2.0) (2024-08-29)
 
 ### Features
