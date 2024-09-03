@@ -1,3 +1,7 @@
+# This workflow serves as the dispatcher for the CI/CD pipeline, acting as a filter to ensure that the
+# pipeline runs only when necessary. It should be placed in a separate file to prevent triggering the
+# CI/CD workflow when conditions are not met, as this could lead to incorrect behavior for bots that
+# depends on the successful execution of specific jobs.
 name: CI/CD
 
 on:
