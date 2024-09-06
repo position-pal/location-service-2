@@ -6,12 +6,15 @@ circe = "0.14.9"
 http4s = "1.0.0-M41"
 scalamock = "0.6.0"
 pureconfig = "0.17.7"
+akka = "2.9.0-M2"
 
 [libraries]
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
 cats-core = "org.typelevel:cats-core_3:2.12.0"
 cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
 cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
+akka-cluster = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
+akka-cluster-sharding = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
 http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
 http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
