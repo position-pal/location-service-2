@@ -19,6 +19,7 @@ component ":location-service" {
 
     [:infrastructure] as I
     [org.http4s:http4s-*] as http4s <<external>>
+    [com.typesafe.akka:akka-cluster-*] as akka <<external>>
 
     D -up-|> C
     A -up-|> D
@@ -27,6 +28,7 @@ component ":location-service" {
     grpc <|-right- P
     I -up-|> P
     http4s <|- I
+    I -|> akka
 }
 
 @enduml
