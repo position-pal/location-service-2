@@ -2,7 +2,7 @@
 scala = "3.5.0"
 scalatest = "3.3.0-SNAP4"
 junit = "1.11.0"
-circe = "0.14.9"
+circe = "0.14.10"
 http4s = "1.0.0-M41"
 scalamock = "0.6.5"
 pureconfig = "0.17.7"
