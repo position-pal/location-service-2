@@ -5,12 +5,13 @@ plugins {
     `java-library`
     id("scala")
     alias(libs.plugins.scala.extras)
+    alias(libs.plugins.cucumber.jvm)
 }
 
 class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) {
 
     fun environmentVariables(): Map<String, String> =
-        rootDir.resolve(dotenv.fileName)
+        rootDir.resolve(fileName)
             .takeIf { it.exists() }
             ?.readLines()
             ?.filter { it.isNotBlank() && !it.startsWith(COMMENT_SYMBOL) }
@@ -23,7 +24,7 @@ class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) 
         private const val KEY_VALUE_SEPARATOR = "="
     }
 }
-val dotenv = DotenvConfiguration()
+val dotenvConfig = DotenvConfiguration()
 
 allprojects {
     group = "io.github.positionpal"
@@ -31,6 +32,7 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = "java-library")
         apply(plugin = "scala")
+        apply(plugin = cucumber.jvm.get().pluginId)
         // TODO: generated code by protobuf should be excluded from qa checks
         if (name != "presentation") {
             apply(plugin = scala.extras.get().pluginId)
@@ -63,10 +65,21 @@ allprojects {
     }
 
     tasks.withType<JavaExec> {
-        dotenv.environmentVariables().forEach { environment(it.key, it.value) }
+        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
+    }
+
+    cucumber {
+        val featureFilesDirectory = "features"
+        featurePath = "src/test/resources/$featureFilesDirectory"
+        glue = "$group.location.${this@allprojects.name}.$featureFilesDirectory"
+        main = "io.cucumber.core.cli.Main"
+        plugin = arrayOf("pretty")
     }
 
     tasks.withType<Test> {
-        dotenv.environmentVariables().forEach { environment(it.key, it.value) }
+        if (projectDir.resolve(cucumber.featurePath).exists()) {
+            dependsOn("cucumber")
+        }
+        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
     }
 }

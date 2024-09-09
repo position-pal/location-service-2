@@ -27,6 +27,8 @@ pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effec
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
+cucumber = "io.cucumber:cucumber-scala_3:8.23.1"
+cucumber-junit = "io.cucumber:cucumber-junit-platform-engine:7.18.1"
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
@@ -39,9 +41,10 @@ http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-c
 pureconfig = [ "pureconfig-core", "pureconfig-cats-effect" ]
 scala-testing = [
     "scalatest",
+    "scalatestplus-junit5",
+    "cucumber",
     "junit-platform-engine",
     "junit-platform-launcher",
-    "scalatestplus-junit5",
     "scalamock",
     "scalamock-test"
 ]
@@ -49,3 +52,4 @@ scala-testing = [
 [plugins]
 akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
+cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
