@@ -15,6 +15,9 @@ cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
 cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
 akka-cluster = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
+akka-persistence = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
+akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
+akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
 http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
 http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
