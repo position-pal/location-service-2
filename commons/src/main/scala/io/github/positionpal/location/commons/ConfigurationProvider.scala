@@ -12,7 +12,7 @@ trait ConfigurationProvider[F[_], C]:
 
 /** A provider of environment variables. */
 class EnvVariablesProvider[F[_]: Sync] extends ConfigurationProvider[F, Map[String, String]]:
-  def configuration: F[Map[String, String]] = Sync[F].delay(sys.env)
+  def configuration: F[Map[String, String]] = Sync[F].blocking(sys.env)
 
 /** A provider of configuration [[C]] taken from a .conf file.
   * @note the [[ConfigReader]] must be provided using scala 2 implicits, like this:
