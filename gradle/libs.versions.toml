@@ -6,7 +6,7 @@ circe = "0.14.9"
 http4s = "1.0.0-M41"
 scalamock = "0.6.0"
 pureconfig = "0.17.7"
-akka = "2.9.0-M2"
+akka = "2.9.3"
 
 [libraries]
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
@@ -31,11 +31,11 @@ log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 cucumber = "io.cucumber:cucumber-scala_3:8.23.1"
-cucumber-junit = "io.cucumber:cucumber-junit-platform-engine:7.18.1"
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
+logback-classic = "ch.qos.logback:logback-classic:1.5.8"
 
 [bundles]
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]

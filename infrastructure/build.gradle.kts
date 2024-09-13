@@ -5,6 +5,7 @@ dependencies {
     implementation(libs.akka.cluster)
     implementation(libs.akka.cluster.sharding)
     implementation(libs.akka.persistence)
+    implementation(libs.logback.classic)
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }
