@@ -36,6 +36,10 @@ scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
+zio = "dev.zio:zio_3:2.1.9"
+zio-actors = "dev.zio:zio-actors_2.13:0.1.0"
+zio-actors-persistence = "dev.zio:zio-actors-persistence_2.13:0.1.0"
+zio-akka-cluster = "dev.zio:zio-akka-cluster_2.13:0.3.0"
 
 [bundles]
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]

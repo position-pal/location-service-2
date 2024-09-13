@@ -11,6 +11,7 @@ include(
     "application",
     "presentation",
     "infrastructure",
+    "experiments",
 )
 
 develocity {
