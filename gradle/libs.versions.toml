@@ -1,41 +1,41 @@
 [versions]
-scala = "3.5.0"
-scalatest = "3.3.0-SNAP4"
-junit = "1.11.0"
+akka = "2.9.3"
 circe = "0.14.9"
 http4s = "1.0.0-M41"
-scalamock = "0.6.0"
+junit = "1.11.0"
 pureconfig = "0.17.7"
-akka = "2.9.3"
+scala = "3.5.0"
+scalamock = "0.6.0"
+scalatest = "3.3.0-SNAP4"
 
 [libraries]
-scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
-cats-core = "org.typelevel:cats-core_3:2.12.0"
-cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
-cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
+akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
 akka-cluster = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
 akka-persistence = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
-akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
 akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
-http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
-http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
-http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
-http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }
+cats-core = "org.typelevel:cats-core_3:2.12.0"
+cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
+cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
 circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
 circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
 circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
-pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
-pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
-log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
-scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
-scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 cucumber = "io.cucumber:cucumber-scala_3:8.23.1"
+http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
+http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }
+http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
+http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
+logback-classic = "ch.qos.logback:logback-classic:1.5.8"
+log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
+pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
+pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
+scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
+scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
+scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
-logback-classic = "ch.qos.logback:logback-classic:1.5.8"
 
 [bundles]
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]
@@ -54,5 +54,5 @@ scala-testing = [
 
 [plugins]
 akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
-scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
 cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
+scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
