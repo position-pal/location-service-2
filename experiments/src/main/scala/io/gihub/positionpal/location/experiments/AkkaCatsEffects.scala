@@ -1,4 +1,4 @@
-package io.github.positionpal.location.infrastructure.utils
+package io.gihub.positionpal.location.experiments
 
 import akka.actor.BootstrapSetup
 import akka.actor.typed.scaladsl.Behaviors
@@ -14,16 +14,9 @@ def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
   Resource:
     for
       ec <- IO.executionContext
-      config = BootstrapSetup(ConfigFactory.load("akka-cluster")).withDefaultExecutionContext(ec)
+      config = BootstrapSetup(ConfigFactory.load("application")).withDefaultExecutionContext(ec)
+      _ <- IO(println(s">> execution context: ${config.defaultExecutionContext}"))
       system <- IO(ActorSystem(behavior, "ClusterSystem", config))
-      cancel = IO.fromFuture(IO(system.whenTerminated)).void
-    yield (system, cancel)
-
-def startupUntyped[T](behavior: Behavior[T]): Resource[IO, akka.actor.ActorSystem] =
-  Resource:
-    for
-      ec <- IO.executionContext
-      system <- IO(akka.actor.ActorSystem.apply("ClusterSystem", None, None, Some(ec)))
       cancel = IO.fromFuture(IO(system.whenTerminated)).void
     yield (system, cancel)
 
@@ -35,6 +28,30 @@ def startupUntyped[T](behavior: Behavior[T]): Resource[IO, akka.actor.ActorSyste
     IO(actorSystem ! "Hello")
   }.unsafeRunSync()
 
+def startupWithoutEc[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
+  Resource:
+    val config = BootstrapSetup(ConfigFactory.load("application"))
+    for
+      system <- IO(ActorSystem(behavior, "ClusterSystem", config))
+      cancel = IO.fromFuture(IO(system.whenTerminated)).void
+    yield (system, cancel)
+
+@main def testWithoutExecutionContext(): Unit =
+  import cats.effect.unsafe.implicits.global
+  println("hello world akka from cats effect")
+  val actorSystemRes = startupWithoutEc(NopeActor())
+  actorSystemRes.use { actorSystem =>
+    IO(actorSystem ! "Hello")
+  }.unsafeRunSync()
+
+def startupUntyped[T](behavior: Behavior[T]): Resource[IO, akka.actor.ActorSystem] =
+  Resource:
+    for
+      ec <- IO.executionContext
+      system <- IO(akka.actor.ActorSystem.apply("ClusterSystem", None, None, Some(ec)))
+      cancel = IO.fromFuture(IO(system.whenTerminated)).void
+    yield (system, cancel)
+
 @main def testUntypedActorSystem(): Unit =
   import cats.effect.unsafe.implicits.global
   println("hello world akka from cats effect")
@@ -43,8 +60,8 @@ def startupUntyped[T](behavior: Behavior[T]): Resource[IO, akka.actor.ActorSyste
     IO(println(actorSystem))
   }.unsafeRunSync()
 
-@main def test2(): Unit =
-  val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("akka-cluster"))
+@main def testWithoutIO(): Unit =
+  val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("application"))
   actorSystem ! "Hello"
 
 object NopeActor:

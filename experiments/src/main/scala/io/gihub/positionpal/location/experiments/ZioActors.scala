@@ -1,3 +1,4 @@
+/*
 package io.gihub.positionpal.location.experiments
 
 import zio.actors.*
@@ -19,3 +20,4 @@ object ZioActors extends App:
     actor <- system.make("myActor", Supervisor.none, (), stateful)
     doubled <- actor ! DoubleCommand(21)
   yield doubled
+ */
