@@ -23,7 +23,7 @@ pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.
 pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
-scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
+scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.1"
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
