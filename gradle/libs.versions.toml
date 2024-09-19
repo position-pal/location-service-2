@@ -45,4 +45,4 @@ scala-testing = [
 
 [plugins]
 akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
-scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"
+scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.2"
