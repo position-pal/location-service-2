@@ -22,10 +22,10 @@ def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
 
 @main def testActorSystemStartup(): Unit =
   import cats.effect.unsafe.implicits.global
-  println("hello world akka from cats effect")
   val actorSystemRes = startup(NopeActor())
   actorSystemRes.use { actorSystem =>
-    IO(actorSystem ! "Hello")
+    IO(actorSystem.log.info("Hello from cats effects dispatcher"))
+    // *> IO(actorSystem ! "Hello")
   }.unsafeRunSync()
 
 def startupWithoutEc[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
