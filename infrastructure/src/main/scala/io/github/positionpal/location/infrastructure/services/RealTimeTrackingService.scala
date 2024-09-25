@@ -23,4 +23,4 @@ object RealTimeTrackingService:
           _ <- Resource.eval(IO(cluster.init(RealTimeUserTracker())))
         yield cluster
 
-    override def handle(event: DrivingEvents): IO[Unit] = ???
+    override def handle[Unit](event: DrivingEvents): IO[Unit] = ???

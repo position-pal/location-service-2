@@ -2,7 +2,7 @@ package io.github.positionpal.location.application.reactions
 
 import io.github.positionpal.location.domain.{DrivingEvents, Route}
 
-/** A reaction to [[DrivingEvents.TrackingEvent]]s. */
+/** A reaction to [[DrivingEvents.Tracking]]s. */
 object TrackingEventReaction extends BinaryShortCircuitReaction:
   case object Continue
   enum Notification(val reason: String):
@@ -10,7 +10,7 @@ object TrackingEventReaction extends BinaryShortCircuitReaction:
     case Success(override val reason: String) extends Notification(reason)
 
   override type Environment = Route
-  override type Event = DrivingEvents.TrackingEvent
+  override type Event = DrivingEvents.Tracking
   override type LeftOutcome = Notification
   override type RightOutcome = Continue.type
 

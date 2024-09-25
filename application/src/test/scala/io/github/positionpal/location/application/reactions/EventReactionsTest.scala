@@ -9,14 +9,14 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
   import Notification.Alert
   import cats.effect.IO
   import cats.effect.unsafe.implicits.global
-  import io.github.positionpal.location.domain.DrivingEvents.{TrackingEvent, StartRoutingEvent}
+  import io.github.positionpal.location.domain.DrivingEvents.{Tracking, StartRouting}
   import io.github.positionpal.location.domain.{DrivingEvents, GPSLocation, Route, UserId, RoutingMode}
   import io.github.positionpal.location.domain.RoutingMode.Driving
 
   import java.util.Date
 
-  private val route = Route(StartRoutingEvent(Date(), UserId("test"), Driving, GPSLocation(0.0, 0.0)), Date())
-  private val event: TrackingEvent = TrackingEvent(Date(), UserId("test"), GPSLocation(0.1, 0.1))
+  private val route = Route(StartRouting(Date(), UserId("test"), Driving, GPSLocation(0.0, 0.0)), Date())
+  private val event: Tracking = Tracking(Date(), UserId("test"), GPSLocation(0.1, 0.1))
 
   describe("`TrackingEventReaction`s"):
     it("should be able to be composed"):
