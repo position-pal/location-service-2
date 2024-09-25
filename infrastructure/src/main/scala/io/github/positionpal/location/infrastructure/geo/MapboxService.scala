@@ -15,21 +15,23 @@ import org.http4s.circe.jsonOf
 import org.http4s.client.Client
 import org.http4s.implicits.uri
 
+/** A [[MapService]] adapter interacting with the Mapbox service.
+  * @see <a href="https://docs.mapbox.com/api/navigation/directions/">Mapbox Directions API</a>.
+  */
 object MapboxService:
-
-  /** Configuration for the [[MapboxServiceAdapter]].
-    * @param client the [[Client]] to use it for HTTP requests
-    * @param accessToken the access token to authenticate with the Mapbox service
-    */
-  case class Configuration(client: Client[IO], accessToken: String)
 
   type IOWithContext[E] = ReaderT[IO, Configuration, E]
   type Response[E] = EitherT[IOWithContext, MapsServiceError, E]
 
-  /** A [[MapService]] adapter interacting with the Mapbox service.
-    * @see <a href="https://docs.mapbox.com/api/navigation/directions/">Mapbox Directions API</a>.
+  /** Configuration for the [[MapboxServiceAdapter]].
+    * @param client      the [[Client]] to use it for HTTP requests
+    * @param accessToken the access token to authenticate with the Mapbox service
     */
-  class Adapter extends MapsService[Response]:
+  case class Configuration(client: Client[IO], accessToken: String)
+
+  def apply(): MapsService[Response] = AdapterImpl()
+
+  private class AdapterImpl extends MapsService[Response]:
 
     override def duration(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): Response[FiniteDuration] =
       request[FiniteDuration](mode, origin, destination)(_.extractDuration)

@@ -8,6 +8,6 @@ import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 object HTTPUtils:
 
-  val client: Resource[IO, Client[IO]] =
+  val clientRes: Resource[IO, Client[IO]] =
     given LoggerFactory[IO] = Slf4jFactory.create[IO]
     EmberClientBuilder.default[IO].build

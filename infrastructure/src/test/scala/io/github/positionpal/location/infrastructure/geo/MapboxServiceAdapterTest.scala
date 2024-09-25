@@ -13,13 +13,14 @@ import org.scalatest.matchers.should.Matchers
 
 class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
 
-  private val mapboxService = MapboxService.Adapter()
+  private val mapboxService = MapboxService()
 
   describe("The Mapbox service adapter"):
     it("should calculate the distance between two locations"):
       val distanceRequest = for
         envs <- EnvVariablesProvider[IO].configuration
-        config <- HTTPUtils.client.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
+        config <- HTTPUtils.clientRes
+          .use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
         distance <- mapboxService.distance(Driving)(cesenaCampus, bolognaCampus).value.run(config)
       yield distance
       val result = distanceRequest.unsafeRunSync()
@@ -30,7 +31,8 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
     it("should calculate the arrival time between two locations"):
       val arrivalTimeRequest = for
         envs <- EnvVariablesProvider[IO].configuration
-        config <- HTTPUtils.client.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
+        config <- HTTPUtils.clientRes
+          .use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
         arrivalTime <- mapboxService.duration(Driving)(cesenaCampus, bolognaCampus).value.run(config)
       yield arrivalTime
       val result = arrivalTimeRequest.unsafeRunSync()

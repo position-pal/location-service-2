@@ -46,9 +46,8 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
   private def checksFor(route: Route, event: Tracking): IO[Either[Any, Either[Notification, Continue.type]]] =
     for
       envs <- EnvVariablesProvider[IO].configuration
-      config <- HTTPUtils.client.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
-      mapService = MapboxService.Adapter()
-      check = ArrivalCheck(mapService) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
+      config <- HTTPUtils.clientRes.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
+      check = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- check(route, event).value.run(config)
     yield result
 
