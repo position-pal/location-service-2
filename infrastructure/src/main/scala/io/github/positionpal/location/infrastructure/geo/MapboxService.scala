@@ -44,15 +44,10 @@ object MapboxService:
     )(extract: Json => Either[MapsServiceError, T]): Response[T] =
       EitherT:
         ReaderT: config =>
-          config.client.expect(directionsApiRoute(mode, origin, destination, config.accessToken))(jsonOf[IO, Json])
+          config.client.expect(directionsRoute(mode, origin, destination, config.accessToken))(jsonOf[IO, Json])
             .attempt.map(_.leftMap(_.getMessage).flatMap(extract(_)))
 
-    private def directionsApiRoute(
-        mode: RoutingMode,
-        origin: GPSLocation,
-        destination: GPSLocation,
-        token: String,
-    ): Uri =
+    private def directionsRoute(mode: RoutingMode, origin: GPSLocation, destination: GPSLocation, token: String): Uri =
       val smode = mode.toString.toLowerCase.appendedAll(if mode == Driving then "-traffic" else "")
       uri"https://api.mapbox.com/directions/v5/mapbox/".addPath(smode)
         .addSegment(s"${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}")
