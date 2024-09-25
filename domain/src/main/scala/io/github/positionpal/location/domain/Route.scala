@@ -6,8 +6,8 @@ import scala.annotation.targetName
 
 /** The route followed by a [[User]] while going from one place to another. */
 trait Route:
-  /** @return the [[DrivingEvents.StartRoutingEvent]] originating the route. */
-  def sourceEvent: DrivingEvents.StartRoutingEvent
+  /** @return the [[DrivingEvents.StartRouting]] originating the route. */
+  def sourceEvent: DrivingEvents.StartRouting
 
   /** @return the expected arrival time to the destination. */
   def expectedArrivalTime: Date
@@ -21,16 +21,16 @@ trait Route:
   @targetName("addSample") def +(sample: GPSLocation): Route
 
 object Route:
-  import DrivingEvents.StartRoutingEvent
+  import DrivingEvents.StartRouting
 
-  def apply(event: StartRoutingEvent, expectedArrivalTime: Date): Route =
+  def apply(event: StartRouting, expectedArrivalTime: Date): Route =
     RouteImpl(event, expectedArrivalTime, List())
 
-  def withPositions(event: StartRoutingEvent, expectedArrivalTime: Date, positions: List[GPSLocation]): Route =
+  def withPositions(event: StartRouting, expectedArrivalTime: Date, positions: List[GPSLocation]): Route =
     RouteImpl(event, expectedArrivalTime, positions)
 
   private case class RouteImpl(
-      sourceEvent: DrivingEvents.StartRoutingEvent,
+      sourceEvent: DrivingEvents.StartRouting,
       expectedArrivalTime: Date,
       positions: List[GPSLocation],
   ) extends Route:

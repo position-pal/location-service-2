@@ -9,7 +9,7 @@ import java.util.Date
 enum DrivingEvents:
 
   /** An event triggered when a user starts routing to a destination. */
-  case StartRoutingEvent(
+  case StartRouting(
       timestamp: Date,
       user: UserId,
       mode: RoutingMode,
@@ -17,15 +17,27 @@ enum DrivingEvents:
   ) extends DrivingEvents
 
   /** An event triggered by a user when needing help. */
-  case SOSAlertEvent(
+  case SOSAlert(
       timestamp: Date,
       user: UserId,
       position: GPSLocation,
   ) extends DrivingEvents
 
   /** An event triggered regularly on behalf of a user, tracking its position. */
-  case TrackingEvent(
+  case Tracking(
       timestamp: Date,
       user: UserId,
       position: GPSLocation,
   ) extends DrivingEvents
+
+  /** An event triggered by a user when stopping the SOS alert. */
+  case StopSOS(
+      timeStamp: Date,
+      user: UserId,
+  )
+
+enum DrivenEvents:
+  case StopRouting(
+      timestamp: Date,
+      user: UserId,
+  ) extends DrivenEvents
