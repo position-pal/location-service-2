@@ -6,7 +6,7 @@ import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
@@ -54,8 +54,14 @@ object RealTimeUserTracker:
   private def mainBehavior(entityId: String, persistenceId: PersistenceId): Behavior[DrivingEvents] =
     Behaviors.setup: ctx =>
       ctx.log.debug("Starting RealTimeUserTracker::{}@{}", entityId, Cluster(ctx.system).selfMember.address)
-      EventSourcedBehavior(persistenceId, emptyState = State(Inactive, None, None), commandHandler = ???, eventHandler = ???)
+      EventSourcedBehavior(
+        persistenceId,
+        emptyState = State(Inactive, None, None),
+        commandHandler = ???,
+        eventHandler = ???,
+      )
 
+  /*
   private val commandHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = (state, command) =>
     command match
       case StartRouting(timestamp, user, mode, arrivalPosition) => ???
@@ -86,3 +92,4 @@ object RealTimeUserTracker:
   private val sosHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
 
   private val routingHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
+   */

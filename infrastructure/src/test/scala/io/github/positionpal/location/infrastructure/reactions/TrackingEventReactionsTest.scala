@@ -14,7 +14,7 @@ import io.github.positionpal.location.application.reactions.{
 import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.DrivingEvents.*
-import io.github.positionpal.location.infrastructure.geo.Configuration
+import io.github.positionpal.location.infrastructure.geo.MapboxService
 import io.github.positionpal.location.infrastructure.utils.*
 import io.github.positionpal.location.infrastructure.utils.MapboxServiceAdapterUtils.*
 import org.scalatest.funspec.AnyFunSpec
@@ -52,7 +52,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
   private def checksFor(route: Route, event: Tracking): IO[Either[Any, Either[Notification, Continue.type]]] =
     for
       envs <- EnvVariablesProvider[IO].configuration
-      config <- clientResource.use(client => IO.pure(Configuration(client, envs("MAPBOX_API_KEY"))))
+      config <- clientResource.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
       check = ArrivalCheck(mapboxServiceAdapter) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- check(route, event).value.run(config)
     yield result

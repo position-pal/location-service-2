@@ -1,7 +1,7 @@
 package io.github.positionpal.location.infrastructure.utils
 
 import cats.effect.{IO, Resource}
-import io.github.positionpal.location.infrastructure.geo.MapboxServiceAdapter
+import io.github.positionpal.location.infrastructure.geo.MapboxService.Adapter as MapboxServiceAdapter
 import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.typelevel.log4cats.LoggerFactory
