@@ -1,14 +1,30 @@
 package io.gihub.positionpal.location.experiments
 
+import scala.concurrent.duration.DurationInt
+import scala.util.{Random, Success}
+
 import akka.actor.BootstrapSetup
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, Behavior}
 import cats.effect.{IO, Resource}
 import com.typesafe.config.ConfigFactory
+import io.gihub.positionpal.location.experiments.NopeActor.Message
 
-//def startup[T](fileName: String = "akka-cluster")(root: => Behavior[T]): ActorSystem[T] =
-//  val config = ConfigFactory.load(fileName)
-//  ActorSystem(root, "ClusterSystem", config)
+@main def testWithoutIO(): Unit =
+  val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("application"))
+  actorSystem ! Message("Hello")
+
+@main def testActorSystemStartup(): Unit =
+  import cats.effect.unsafe.implicits.global
+  val actorSystemRes = startup(NopeActor())
+  actorSystemRes.use { actorSystem =>
+    IO(actorSystem.log.info("Hello from cats effects dispatcher"))
+      *> IO(actorSystem ! Message("Hello World"))
+      *> IO.sleep(5.seconds)
+      *> IO(actorSystem ! Message("Another message"))
+      *> IO.sleep(5.seconds)
+      *> IO(actorSystem.terminate())
+  }.unsafeRunSync()
 
 def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
   Resource:
@@ -20,57 +36,29 @@ def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
       cancel = IO.fromFuture(IO(system.whenTerminated)).void
     yield (system, cancel)
 
-@main def testActorSystemStartup(): Unit =
-  import cats.effect.unsafe.implicits.global
-  val actorSystemRes = startup(NopeActor())
-  actorSystemRes.use { actorSystem =>
-    IO(actorSystem.log.info("Hello from cats effects dispatcher"))
-    // *> IO(actorSystem ! "Hello")
-  }.unsafeRunSync()
-
-def startupWithoutEc[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
-  Resource:
-    val config = BootstrapSetup(ConfigFactory.load("application"))
-    for
-      system <- IO(ActorSystem(behavior, "ClusterSystem", config))
-      cancel = IO.fromFuture(IO(system.whenTerminated)).void
-    yield (system, cancel)
-
-@main def testWithoutExecutionContext(): Unit =
-  import cats.effect.unsafe.implicits.global
-  println("hello world akka from cats effect")
-  val actorSystemRes = startupWithoutEc(NopeActor())
-  actorSystemRes.use { actorSystem =>
-    IO(actorSystem ! "Hello")
-  }.unsafeRunSync()
-
-def startupUntyped[T](behavior: Behavior[T]): Resource[IO, akka.actor.ActorSystem] =
-  Resource:
-    for
-      ec <- IO.executionContext
-      system <- IO(akka.actor.ActorSystem.apply("ClusterSystem", None, None, Some(ec)))
-      cancel = IO.fromFuture(IO(system.whenTerminated)).void
-    yield (system, cancel)
-
-@main def testUntypedActorSystem(): Unit =
-  import cats.effect.unsafe.implicits.global
-  println("hello world akka from cats effect")
-  val actorSystemRes = startupUntyped(NopeActor())
-  actorSystemRes.use { actorSystem =>
-    IO(println(actorSystem))
-  }.unsafeRunSync()
-
-@main def testWithoutIO(): Unit =
-  val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("application"))
-  actorSystem ! "Hello"
-
 object NopeActor:
 
-  def apply(): Behavior[String] =
-    Behaviors.setup { context =>
+  sealed trait Command
+  case class Message(message: String) extends Command
+  private case class Result(newState: Int) extends Command
+
+  import cats.effect.unsafe.implicits.global
+
+  def apply(myState: Int = 0): Behavior[Command] =
+    Behaviors.setup: context =>
       context.log.info("NopeActor started")
-      Behaviors.receiveMessage { message =>
-        context.log.info("Received message: {}", message)
-        Behaviors.same
-      }
-    }
+      Behaviors.receiveMessage:
+        case Message(message) =>
+          context.log.info("Received message: {}. My current state is: {}", message, myState)
+          context.log.info("Roll a dice asynchronously")
+          context.pipeToSelf[Int](rollADice().unsafeToFuture()):
+            case Success(value) => Result(value)
+            case _ => Result(-1)
+          context.log.info("Dice rolling started...")
+          Behaviors.same
+        case Result(value) =>
+          context.log.info("Received rolled dice result: {}", value)
+          NopeActor(value)
+
+  private def rollADice(limit: Int = Int.MaxValue): IO[Int] =
+    IO.sleep(3.seconds) *> IO(Random().nextInt(limit))

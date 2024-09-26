@@ -7,7 +7,7 @@ import cats.effect.unsafe.IORuntime
 
 object IOTests extends App:
 
-  val ioComputation =
+  val ioComputation: IO[Unit] =
     for
       _ <- IO(println("Type something:"))
       input <- IO(scala.io.StdIn.readLine())

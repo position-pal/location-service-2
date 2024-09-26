@@ -43,7 +43,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
         val event: Tracking = Tracking(Date(), UserId("test"), cesenaCampus)
         checksFor(route, event).unsafeRunSync() should matchPattern { case Right(Left(Notification.Success(_))) => }
 
-  private def checksFor(route: Route, event: Tracking): IO[Either[Any, Either[Notification, Continue.type]]] =
+  private def checksFor(route: Route, event: Tracking) =
     for
       envs <- EnvVariablesProvider[IO].configuration
       config <- HTTPUtils.clientRes.use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))

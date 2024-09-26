@@ -6,11 +6,12 @@ import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.EventSourcedBehavior
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.DrivingEvents.*
+//import io.github.positionpal.location.infrastructure.geo.{MapboxConfigurationProvider, MapboxService}
 
 /*
  * Question: what about the order of reactions results?
@@ -39,7 +40,7 @@ import io.github.positionpal.location.domain.DrivingEvents.*
 object RealTimeUserTracker:
 
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
-  private val typeKey: EntityTypeKey[DrivingEvents] = EntityTypeKey[DrivingEvents]("RealTimeUserTracker")
+  val typeKey: EntityTypeKey[DrivingEvents] = EntityTypeKey[DrivingEvents]("RealTimeUserTracker")
 
   private case class State(userState: UserState, route: Option[Route], trackingEvent: Option[Tracking])
 
@@ -57,35 +58,30 @@ object RealTimeUserTracker:
       EventSourcedBehavior(
         persistenceId,
         emptyState = State(Inactive, None, None),
-        commandHandler = ???,
-        eventHandler = ???,
+        commandHandler = (_, _) => Effect.none,
+        eventHandler = (_, _) => State(Inactive, None, None),
       )
 
   /*
   private val commandHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = (state, command) =>
     command match
-      case StartRouting(timestamp, user, mode, arrivalPosition) => ???
-      case SOSAlert(timestamp, user, position) => ???
+      case ev @ StartRouting(_, _, _, _) => ???
+      case ev @ SOSAlert(_, _, _) => ???
       case ev @ Tracking(_, _, _) => ???
+      case ev @ StopSOS(_, _) => ???
 
   private val eventHandler: (State, DrivingEvents) => State = (state, event) => ???
 
   private val trackingHandler: (State, Tracking) => Effect[DrivingEvents, State] = (state, event) =>
     state match
-      case State(Routing, route, _) =>
-        // Trigger the pipeline of reactions asynchronously (with pipeToSelf)
-        // When the pipeline finishes its result is enqueued as a message to the actor
-        //    if outcome is Continue      => Effect.none
-        //    if outcome is Alert(msg)    => send notification => Effect.none
-        //    if outcome is Success(msg)  => send notification => Effect.persist(StopRouting)
-        //
-        // Problem: how to avoid the flooding of notifications at each update of the position?
+      case State(Routing, Some(route), _) =>
+        val reactionsPipeline: IO[Either[MapsServiceError, Either[Notification, Continue.type]]] = for
+          config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
+          checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
+          result <- checks(route, event).value.run(config)
+        yield result
         Effect.persist(event)
-      case _ =>
-        // Either way the current state is SOS, Inactive or Active we persist the event in the journal
-        //    Note: if state is 'Inactive' then the event handler updates it to Active
-        //          if route is not 'None', then the route is updated with the new position
-        Effect.persist(event)
+      case _ => Effect.persist(event)
 
   private val inactiveHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
 
