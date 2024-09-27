@@ -34,7 +34,7 @@ object RealTimeTrackingService:
   import cats.effect.unsafe.implicits.global
   import scala.concurrent.duration.DurationInt
   val service = RealTimeTrackingService()
-  val cluster: Resource[IO, ActorSystem[DrivingEvents]] = service.cluster.run(ConfigFactory.load("akka-cluster"))
+  val cluster: Resource[IO, ActorSystem[DrivingEvents]] = service.cluster.run(ConfigFactory.load("akka.conf"))
   cluster.use: system =>
     IO.println(s"System: $system")
       *> IO.println(s"Cluster Sharding: ${ClusterSharding(system)}")

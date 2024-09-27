@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.akka.grpc)
+    // alias(libs.plugins.akka.grpc)
 }
 
 dependencies {

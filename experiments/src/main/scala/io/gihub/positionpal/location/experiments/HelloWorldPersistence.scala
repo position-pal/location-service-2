@@ -17,11 +17,11 @@ import scala.util.Random
 
 object User:
 
-  trait Command extends Message
+  trait Command extends SerializableMessage
   final case class Greet(whom: String)(val replyTo: ActorRef[Greeting]) extends Command
   final case class Greeting(whom: String, numberOfPeople: Int) extends Command
 
-  private trait Event extends Message
+  private trait Event extends SerializableMessage
   private final case class Greeted(whom: String) extends Event
 
   final case class KnownPeople(names: Set[String]) extends CborSerializable:

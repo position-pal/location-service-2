@@ -1,5 +1,5 @@
 [versions]
-akka = "2.9.4"
+akka = "2.9.5"
 circe = "0.14.9"
 http4s = "1.0.0-M41"
 junit = "1.11.0"
