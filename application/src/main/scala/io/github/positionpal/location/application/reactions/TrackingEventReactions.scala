@@ -1,8 +1,8 @@
 package io.github.positionpal.location.application.reactions
 
-import io.github.positionpal.location.domain.{DrivingEvents, Route}
+import io.github.positionpal.location.domain.{Tracking, Route}
 
-/** A reaction to [[DrivingEvents.Tracking]]s. */
+/** A reaction to [[Tracking]] events. */
 object TrackingEventReaction extends BinaryShortCircuitReaction:
   case object Continue
   enum Notification(val reason: String):
@@ -10,7 +10,7 @@ object TrackingEventReaction extends BinaryShortCircuitReaction:
     case Success(override val reason: String) extends Notification(reason)
 
   override type Environment = Route
-  override type Event = DrivingEvents.Tracking
+  override type Event = Tracking
   override type LeftOutcome = Notification
   override type RightOutcome = Continue.type
 
@@ -32,7 +32,7 @@ object ArrivalCheck:
     on[M]: (route, event) =>
       for
         config <- ReactionsConfiguration.get
-        distance <- mapsService.distance(route.sourceEvent.mode)(event.position, route.sourceEvent.arrivalPosition)
+        distance <- mapsService.distance(route.sourceEvent.mode)(event.position, route.sourceEvent.destination)
         outcome =
           if distance.toMeters.value <= config.proximityToleranceMeters.meters.value
           then Left(Success(successMessage))

@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.storage
 
-import io.github.positionpal.location.domain.DrivingEvents.Tracking
+import io.github.positionpal.location.domain.Tracking
 import io.github.positionpal.location.domain.UserId
 
 /** The reading model projection for [[Tracking]]s.

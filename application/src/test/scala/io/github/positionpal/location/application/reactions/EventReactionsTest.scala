@@ -9,8 +9,7 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
   import Notification.Alert
   import cats.effect.IO
   import cats.effect.unsafe.implicits.global
-  import io.github.positionpal.location.domain.DrivingEvents.{Tracking, StartRouting}
-  import io.github.positionpal.location.domain.{DrivingEvents, GPSLocation, Route, UserId, RoutingMode}
+  import io.github.positionpal.location.domain.*
   import io.github.positionpal.location.domain.RoutingMode.Driving
 
   import java.util.Date

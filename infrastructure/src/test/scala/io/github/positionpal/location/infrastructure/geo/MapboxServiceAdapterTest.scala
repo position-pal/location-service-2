@@ -21,7 +21,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
         envs <- EnvVariablesProvider[IO].configuration
         config <- HTTPUtils.clientRes
           .use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
-        distance <- mapboxService.distance(Driving)(cesenaCampus, bolognaCampus).value.run(config)
+        distance <- mapboxService.distance(Driving)(cesenaCampusLocation, bolognaCampusLocation).value.run(config)
       yield distance
       val result = distanceRequest.unsafeRunSync()
       result.isRight shouldBe true
@@ -33,7 +33,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
         envs <- EnvVariablesProvider[IO].configuration
         config <- HTTPUtils.clientRes
           .use(client => IO.pure(MapboxService.Configuration(client, envs("MAPBOX_API_KEY"))))
-        arrivalTime <- mapboxService.duration(Driving)(cesenaCampus, bolognaCampus).value.run(config)
+        arrivalTime <- mapboxService.duration(Driving)(cesenaCampusLocation, bolognaCampusLocation).value.run(config)
       yield arrivalTime
       val result = arrivalTimeRequest.unsafeRunSync()
       result.isRight shouldBe true

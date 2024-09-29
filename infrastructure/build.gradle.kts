@@ -10,4 +10,5 @@ dependencies {
     implementation(libs.logback.classic)
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
+    implementation("com.fasterxml.jackson.module:jackson-module-scala_3:2.18.0")
 }
