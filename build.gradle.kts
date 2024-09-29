@@ -33,10 +33,7 @@ allprojects {
         apply(plugin = "java-library")
         apply(plugin = "scala")
         apply(plugin = cucumber.jvm.get().pluginId)
-        // TODO: generated code by protobuf should be excluded from qa checks
-        if (name != "presentation") {
-            apply(plugin = scala.extras.get().pluginId)
-        }
+        apply(plugin = scala.extras.get().pluginId)
     }
 
     repositories {

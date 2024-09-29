@@ -7,10 +7,8 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
-import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
-//import io.github.positionpal.location.infrastructure.geo.{MapboxConfigurationProvider, MapboxService}
 
 object RealTimeUserTracker:
 
@@ -20,9 +18,13 @@ object RealTimeUserTracker:
   type Command = DrivingEvent
   type Event = DrivingEvent
 
-  final case class State(userState: UserState, route: Option[Route], trackingEvent: Option[Tracking])
+  sealed trait State
   object State:
-    def empty: State = State(Inactive, None, None)
+    def empty: State = Inactive()
+
+  case class Inactive() extends State
+  case class Active(lastTrace: Tracking) extends State
+  case class Routing(startRouting: StartRouting, tracing: List[Tracking]) extends State
 
   /** Configure this actor to be managed by cluster sharding.
     * @return the [[Entity]] instance that will be managed by cluster sharding.
@@ -38,9 +40,9 @@ object RealTimeUserTracker:
 
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case StartRouting(timestamp, user, mode, destination, expectedArrival) => ???
+      case ev: StartRouting => Routing(ev, List.empty)
       case SOSAlert(timestamp, user, position) => ???
-      case ev @ Tracking(_, _, _) => State(Active, None, Some(ev)) // TODO TO COMPLETE
+      case ev: Tracking => Active(ev)
       case StopSOS(timestamp, user) => ???
       case StopRouting(timestamp, user) => ???
 
@@ -48,14 +50,20 @@ object RealTimeUserTracker:
     (state, command) =>
       command match
         case ev: Tracking => trackingHandler(ctx)(state, ev)
+        case ev: StartRouting => routingHandler(state, ev)
         case _ => Effect.none
 
-  // private val routingHandler: (State, StartRouting) => Effect[DrivingEvents, State] = (_, _) => ???
+  private val routingHandler: (State, StartRouting) => Effect[DrivingEvent, State] =
+    (_, event) => Effect.persist(event)
 
   private def trackingHandler(ctx: ActorContext[DrivingEvent]): (State, Tracking) => Effect[DrivingEvent, State] =
     (state, event) =>
+      ctx.log.info("Tracking")
       state match
-        case State(Routing, Some(route), _) =>
+        case _ => Effect.persist(event)
+
+  /*
+          case State(Routing, Some(route), _) =>
           ctx.log.info("Routing")
           // ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
           //        reaction(route, event).unsafeToFuture().flatMap:
@@ -64,9 +72,7 @@ object RealTimeUserTracker:
           //          case Left(mapServiceError) => ???
           // Effect.persist(event)
           ???
-        case _ => Effect.persist(event)
 
-  /*
   private def reaction(route: Route, event: Tracking) =
     for
       config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
