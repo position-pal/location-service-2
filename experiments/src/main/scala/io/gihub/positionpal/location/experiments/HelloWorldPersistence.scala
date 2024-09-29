@@ -1,19 +1,18 @@
 package io.gihub.positionpal.location.experiments
 
-import akka.actor.typed.scaladsl.ActorContext
-import akka.actor.typed.scaladsl.Behaviors
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.{Await, Future}
+import scala.util.Random
+
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
-import akka.cluster.typed.Cluster
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
+import akka.cluster.typed.Cluster
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.serialization.jackson.CborSerializable
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.{Duration, DurationInt}
-import scala.util.Random
 
 object User:
 
@@ -22,21 +21,22 @@ object User:
   final case class Greeting(whom: String, numberOfPeople: Int) extends Command
 
   private trait Event extends SerializableMessage
-  private final case class Greeted(whom: String) extends Event
+  final private case class Greeted(whom: String) extends Event
 
   final case class KnownPeople(names: Set[String]) extends CborSerializable:
     def add(name: String): KnownPeople = copy(names = names + name)
     def numberOfPeople: Int = names.size
 
   private def commandHandler(
-    ctx: ActorContext[Command],
-    entityId: String
+      ctx: ActorContext[Command],
+      entityId: String,
   ): (KnownPeople, Command) => Effect[Greeted, KnownPeople] =
-    (_, cmd) => cmd match
-      case cmd: Greet =>
-        println(s":::: Greeted ${cmd.whom} from $entityId actor @ ${Cluster(ctx.system).selfMember.address}")
-        Effect.persist(Greeted(cmd.whom))
-          .thenRun((state: KnownPeople) => cmd.replyTo ! Greeting(cmd.whom, state.numberOfPeople))
+    (_, cmd) =>
+      cmd match
+        case cmd: Greet =>
+          println(s":::: Greeted ${cmd.whom} from $entityId actor @ ${Cluster(ctx.system).selfMember.address}")
+          Effect.persist(Greeted(cmd.whom))
+            .thenRun((state: KnownPeople) => cmd.replyTo ! Greeting(cmd.whom, state.numberOfPeople))
 
   private def eventHandler(ctx: ActorContext[Command]): (KnownPeople, Greeted) => KnownPeople =
     (state, evt) =>
@@ -52,7 +52,7 @@ object User:
         persistenceId,
         emptyState = KnownPeople(Set.empty),
         commandHandler(context, entityId),
-        eventHandler(context)
+        eventHandler(context),
       )
 end User
 
@@ -66,7 +66,7 @@ class HelloWorldService(system: ActorSystem[?]):
     User(entityContext.entityId, PersistenceId(entityContext.entityTypeKey.name, entityContext.entityId))
   })
 
-  private implicit val askTimeout: Timeout = Timeout(5.seconds)
+  implicit private val askTimeout: Timeout = Timeout(5.seconds)
 
   def greet(worldId: String, whom: String): Future[Int] =
     val entityRef = sharding.entityRefFor(User.TypeKey, worldId)
@@ -82,8 +82,7 @@ class HelloWorldService(system: ActorSystem[?]):
 
 object PersistenceWithRelocation:
 
-  private def config(port: Int) = ConfigFactory
-    .parseString(s"""akka.remote.artery.canonical.port=$port""")
+  private def config(port: Int) = ConfigFactory.parseString(s"""akka.remote.artery.canonical.port=$port""")
     .withFallback(ConfigFactory.load("application"))
 
   @main def node1(): Unit =

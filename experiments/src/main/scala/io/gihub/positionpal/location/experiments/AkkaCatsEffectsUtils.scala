@@ -16,10 +16,9 @@ def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
       cancel = IO.fromFuture(IO(system.whenTerminated)).void
     yield (system, cancel)
 
-/**
- * Just to have a reference of the dispatchers used by Akka.
- * Use this to compare with the cats effects dispatcher with a monitoring tool.
- */
+/** Just to have a reference of the dispatchers used by Akka.
+  * Use this to compare with the cats effects dispatcher with a monitoring tool.
+  */
 @main def simpleWithoutIO(): Unit =
   val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("application"))
   actorSystem ! Message("Hello")

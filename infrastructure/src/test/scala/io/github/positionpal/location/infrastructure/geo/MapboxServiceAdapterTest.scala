@@ -7,6 +7,7 @@ import io.github.positionpal.location.application.geo.{Distance, MapsServiceErro
 import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.RoutingMode
 import io.github.positionpal.location.domain.RoutingMode.Driving
+import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.utils.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

@@ -1,12 +1,12 @@
 package io.gihub.positionpal.location.experiments
 
+import scala.concurrent.duration.DurationInt
+import scala.util.{Random, Success}
+
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import cats.effect.IO
 import io.gihub.positionpal.location.experiments.NopeActor.Message
-
-import scala.concurrent.duration.DurationInt
-import scala.util.{Random, Success}
 
 object NopeActor:
 

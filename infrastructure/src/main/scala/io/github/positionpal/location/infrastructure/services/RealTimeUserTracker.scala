@@ -9,9 +9,6 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
-//import cats.effect.IO
-//import io.github.positionpal.location.application.reactions.TrackingEventReaction.Notification
-//import io.github.positionpal.location.application.reactions.{ArrivalCheck, ArrivalTimeoutCheck, StationaryCheck}
 import io.github.positionpal.location.domain.*
 //import io.github.positionpal.location.infrastructure.geo.{MapboxConfigurationProvider, MapboxService}
 
@@ -39,33 +36,44 @@ object RealTimeUserTracker:
       ctx.log.debug("Starting RealTimeUserTracker::{}@{}", entityId, Cluster(ctx.system).selfMember.address)
       EventSourcedBehavior(PersistenceId(typeKey.name, entityId), State.empty, commandHandler(ctx), eventHandler)
 
-  private def commandHandler(ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
-    (state, command) => command match
-      case _ =>
-        ctx.log.info("Other")
-        Effect.none
+  private val eventHandler: (State, Event) => State = (state, event) =>
+    event match
+      case StartRouting(timestamp, user, mode, destination, expectedArrival) => ???
+      case SOSAlert(timestamp, user, position) => ???
+      case ev @ Tracking(_, _, _) => State(Active, None, Some(ev)) // TODO TO COMPLETE
+      case StopSOS(timestamp, user) => ???
+      case StopRouting(timestamp, user) => ???
 
-  private val eventHandler: (State, Event) => State = (state, event) => State.empty
+  private def commandHandler(ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
+    (state, command) =>
+      command match
+        case ev: Tracking => trackingHandler(ctx)(state, ev)
+        case _ => Effect.none
 
   // private val routingHandler: (State, StartRouting) => Effect[DrivingEvents, State] = (_, _) => ???
 
-/*  private def trackingHandler(ctx: ActorContext[DrivingEvents]): (State, Tracking) => Effect[DrivingEvents, State] = (state, event) =>
-    state match
-      case State(Routing, Some(route), _) =>
-        // ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
-        //        reaction(route, event).unsafeToFuture().flatMap:
-        //          case Right(_) => ()
-        //          case Left(notification: Notification) => ???
-        //          case Left(mapServiceError) => ???
-        Effect.persist(event)
-      case _ => Effect.persist(event)
+  private def trackingHandler(ctx: ActorContext[DrivingEvent]): (State, Tracking) => Effect[DrivingEvent, State] =
+    (state, event) =>
+      state match
+        case State(Routing, Some(route), _) =>
+          ctx.log.info("Routing")
+          // ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
+          //        reaction(route, event).unsafeToFuture().flatMap:
+          //          case Right(_) => ()
+          //          case Left(notification: Notification) => ???
+          //          case Left(mapServiceError) => ???
+          // Effect.persist(event)
+          ???
+        case _ => Effect.persist(event)
 
+  /*
   private def reaction(route: Route, event: Tracking) =
     for
       config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
       checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- checks(route, event).value.run(config)
-    yield result.flatten*/
+    yield result.flatten
+   */
 
   /*
   private val inactiveHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???

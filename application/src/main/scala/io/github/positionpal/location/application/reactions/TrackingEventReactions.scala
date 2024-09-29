@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.reactions
 
-import io.github.positionpal.location.domain.{Tracking, Route}
+import io.github.positionpal.location.domain.{Route, Tracking}
 
 /** A reaction to [[Tracking]] events. */
 object TrackingEventReaction extends BinaryShortCircuitReaction:
@@ -58,6 +58,6 @@ object ArrivalTimeoutCheck:
   private val alertMessage = "User has not reached the destination within the expected time."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (route, event) =>
-    if event.timestamp.after(route.expectedArrivalTime)
+    if event.timestamp.after(route.sourceEvent.expectedArrival)
     then Monad[M].pure(Left(Alert(alertMessage)))
     else Monad[M].pure(Right(Continue))

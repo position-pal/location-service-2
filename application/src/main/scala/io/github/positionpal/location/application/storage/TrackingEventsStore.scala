@@ -1,7 +1,6 @@
 package io.github.positionpal.location.application.storage
 
-import io.github.positionpal.location.domain.Tracking
-import io.github.positionpal.location.domain.UserId
+import io.github.positionpal.location.domain.{Tracking, UserId}
 
 /** The reading model projection for [[Tracking]]s.
   * It encapsulates the read-side operations for querying and retrieving

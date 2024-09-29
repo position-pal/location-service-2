@@ -1,16 +1,11 @@
 package io.github.positionpal.location.domain
 
-import java.util.Date
-
 import scala.annotation.targetName
 
 /** The route followed by a [[User]] while going from one place to another. */
 trait Route:
-  /** @return the [[StartRouting]] event originating the route. */
+  /** @return the [[StartRouting]] event originating the route, encapsulating all the routing information. */
   def sourceEvent: StartRouting
-
-  /** @return the expected arrival time to the destination. */
-  def expectedArrivalTime: Date
 
   /** @return the list of positions composing this route, in reverse chronological order,
     *         i.e., from the most recent to the oldest (the most recent is in the head).
@@ -22,20 +17,14 @@ trait Route:
 
 object Route:
 
-  def apply(event: StartRouting, expectedArrivalTime: Date): Route =
-    RouteImpl(event, expectedArrivalTime, List())
+  def apply(event: StartRouting): Route = RouteImpl(event, List())
 
-  def withPositions(event: StartRouting, expectedArrivalTime: Date, positions: List[GPSLocation]): Route =
-    RouteImpl(event, expectedArrivalTime, positions)
+  def withPositions(event: StartRouting, positions: List[GPSLocation]): Route = RouteImpl(event, positions)
 
-  private case class RouteImpl(
-      sourceEvent: StartRouting,
-      expectedArrivalTime: Date,
-      positions: List[GPSLocation],
-  ) extends Route:
+  private case class RouteImpl(sourceEvent: StartRouting, positions: List[GPSLocation]) extends Route:
     @targetName("addSample")
     override def +(sample: GPSLocation): Route =
-      withPositions(sourceEvent, expectedArrivalTime, sample +: positions)
+      withPositions(sourceEvent, sample +: positions)
 
 /** The mode of routing to a destination. */
 enum RoutingMode:
