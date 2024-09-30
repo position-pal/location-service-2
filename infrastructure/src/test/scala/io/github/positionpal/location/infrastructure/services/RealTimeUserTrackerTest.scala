@@ -26,6 +26,9 @@ class RealTimeUserTrackerTest
     super.beforeEach()
     eventSourcedTestKit.clear()
 
+  private val user = UserId("user-test")
+  private val trackingEvent = Tracking(now, user, cesenaCampusLocation)
+
   "RealTimeUserTracker" should:
     "be initialized with an inactive state and empty tracking" in:
       val state = eventSourcedTestKit.getState()
@@ -34,11 +37,9 @@ class RealTimeUserTrackerTest
       state.lastSample shouldBe None
 
     "accept as commands tracking events" in:
-      eventSourcedTestKit
-        .runCommand(StartRouting(now, UserId("1"), RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
+      eventSourcedTestKit.runCommand(StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
 
     "save the last tracking event and change its user state if a tracking event is received" in:
-      val trackingEvent = Tracking(now, UserId("1"), cesenaCampusLocation)
       eventSourcedTestKit.runCommand(trackingEvent).events should contain only trackingEvent
       val state = eventSourcedTestKit.getState()
       state.userState shouldBe Active
@@ -46,12 +47,21 @@ class RealTimeUserTrackerTest
       state.lastSample shouldBe Some(trackingEvent)
 
     "update the routing information if a routing is started" in:
-      val startRoutingEvent = StartRouting(now, UserId("1"), RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
+      eventSourcedTestKit.runCommand(trackingEvent)
+      val startRoutingEvent = StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
       eventSourcedTestKit.runCommand(startRoutingEvent).events should contain only startRoutingEvent
       val state = eventSourcedTestKit.getState()
       state.userState shouldBe Routing
       state.route shouldBe Some(Route(startRoutingEvent))
-      state.lastSample shouldBe None
+      state.lastSample shouldBe Some(trackingEvent)
+
+    "handle the tracking event on routing" in:
+      eventSourcedTestKit.runCommand(StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, now))
+      Thread.sleep(1000)
+      val result = eventSourcedTestKit.runCommand(trackingEvent)
+      println(result.events)
+      println(result.state)
+      Thread.sleep(5_000)
 
 object RealTimeUserTrackerTest:
   val config: Config = ConfigFactory.parseString("""

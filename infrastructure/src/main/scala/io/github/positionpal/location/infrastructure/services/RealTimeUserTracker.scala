@@ -1,5 +1,7 @@
 package io.github.positionpal.location.infrastructure.services
 
+import scala.util.{Failure, Success}
+
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.Cluster
@@ -9,25 +11,28 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import io.bullet.borer.Codec
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
+import io.github.positionpal.location.application.reactions.*
+import io.github.positionpal.location.application.reactions.TrackingEventReaction.Notification
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.infrastructure.geo.*
 
 object RealTimeUserTracker:
 
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
   val typeKey: EntityTypeKey[Command] = EntityTypeKey[Command]("RealTimeUserTracker")
 
-  type Command = DrivingEvent
+  case object Ignore
+
+  type Command = DrivingEvent | Ignore.type
   type Event = DrivingEvent
 
-  final case class State(
-    userState: UserState,
-    route: Option[Route],
-    lastSample: Option[Tracking]
-  ) extends Serializable
+  final case class State(userState: UserState, route: Option[Route], lastSample: Option[Tracking]) extends Serializable
   object State:
     def empty: State = State(UserState.Inactive, None, None)
+
+  import cats.effect.unsafe.implicits.global
 
   /** Configure this actor to be managed by cluster sharding.
     * @return the [[Entity]] instance that will be managed by cluster sharding.
@@ -44,10 +49,10 @@ object RealTimeUserTracker:
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
       case ev: StartRouting => State(Routing, Some(Route(ev)), state.lastSample)
-      case SOSAlert(timestamp, user, position) => ???
+      case ev: SOSAlert => ??? // State(SOS, Some(Route(ev)), state.lastSample)
       case ev: Tracking => State(Active, None, Some(ev))
-      case StopSOS(timestamp, user) => ???
-      case StopRouting(timestamp, user) => ???
+      case ev: StopSOS => State(Active, None, state.lastSample)
+      case ev: StopRouting => State(Active, None, state.lastSample)
 
   private def commandHandler(ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
     (state, command) =>
@@ -59,22 +64,31 @@ object RealTimeUserTracker:
   private val routingHandler: (State, StartRouting) => Effect[DrivingEvent, State] =
     (_, event) => Effect.persist(event)
 
-  private def trackingHandler(ctx: ActorContext[DrivingEvent]): (State, Tracking) => Effect[DrivingEvent, State] =
+  private def trackingHandler(ctx: ActorContext[Command]): (State, Tracking) => Effect[DrivingEvent, State] =
     (state, event) =>
-      ctx.log.info("Tracking")
       state match
+        case State(Routing, Some(route), _) =>
+          ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
+            case Success(value) =>
+              value match
+                case Right(_) =>
+                  ctx.log.debug("Routing continuing...")
+                  Ignore
+                case Left(Notification.Alert(msg)) =>
+                  ctx.log.debug(msg)
+                  Ignore
+                case Left(Notification.Success(msg)) =>
+                  ctx.log.debug(msg)
+                  StopRouting(event.timestamp, event.user)
+                case Left(mapError: String) =>
+                  ctx.log.error(mapError)
+                  Ignore
+            case Failure(exception) =>
+              ctx.log.error(exception.getMessage)
+              Ignore
+          ctx.log.debug("Routing...")
+          Effect.persist(event)
         case _ => Effect.persist(event)
-
-  /*
-          case State(Routing, Some(route), _) =>
-          ctx.log.info("Routing")
-          // ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
-          //        reaction(route, event).unsafeToFuture().flatMap:
-          //          case Right(_) => ()
-          //          case Left(notification: Notification) => ???
-          //          case Left(mapServiceError) => ???
-          // Effect.persist(event)
-          ???
 
   private def reaction(route: Route, event: Tracking) =
     for
@@ -82,20 +96,13 @@ object RealTimeUserTracker:
       checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- checks(route, event).value.run(config)
     yield result.flatten
-   */
-
-  /*
-  private val inactiveHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
-
-  private val sosHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
-
-  private val routingHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
-   */
 
 class BorerAkkaSerializer extends CborAkkaSerializer with Codecs:
   override def identifier: Int = 19923
 
   given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
+  given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
 
+  register[RealTimeUserTracker.Ignore.type]()
   register[DrivingEvent]()
   register[RealTimeUserTracker.State]()
