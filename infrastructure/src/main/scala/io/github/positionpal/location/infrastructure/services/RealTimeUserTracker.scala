@@ -7,6 +7,9 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import io.bullet.borer.Codec
+import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
+import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
 
@@ -18,13 +21,13 @@ object RealTimeUserTracker:
   type Command = DrivingEvent
   type Event = DrivingEvent
 
-  sealed trait State
+  final case class State(
+    userState: UserState,
+    route: Option[Route],
+    lastSample: Option[Tracking]
+  ) extends Serializable
   object State:
-    def empty: State = Inactive()
-
-  case class Inactive() extends State
-  case class Active(lastTrace: Tracking) extends State
-  case class Routing(startRouting: StartRouting, tracing: List[Tracking]) extends State
+    def empty: State = State(UserState.Inactive, None, None)
 
   /** Configure this actor to be managed by cluster sharding.
     * @return the [[Entity]] instance that will be managed by cluster sharding.
@@ -40,9 +43,9 @@ object RealTimeUserTracker:
 
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case ev: StartRouting => Routing(ev, List.empty)
+      case ev: StartRouting => State(Routing, Some(Route(ev)), state.lastSample)
       case SOSAlert(timestamp, user, position) => ???
-      case ev: Tracking => Active(ev)
+      case ev: Tracking => State(Active, None, Some(ev))
       case StopSOS(timestamp, user) => ???
       case StopRouting(timestamp, user) => ???
 
@@ -88,3 +91,11 @@ object RealTimeUserTracker:
 
   private val routingHandler: (State, DrivingEvents) => Effect[DrivingEvents, State] = ???
    */
+
+class BorerAkkaSerializer extends CborAkkaSerializer with Codecs:
+  override def identifier: Int = 19923
+
+  given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
+
+  register[DrivingEvent]()
+  register[RealTimeUserTracker.State]()
