@@ -11,13 +11,16 @@ sealed trait DrivingEvent:
   def user: UserId
 
 /** An event triggered when a user starts routing to a destination. */
-case class StartRouting(
+case class RoutingStarted(
     timestamp: Date,
     user: UserId,
     mode: RoutingMode,
     destination: GPSLocation,
     expectedArrival: Date,
 ) extends DrivingEvent
+
+/** An event triggered by a user when stopping the routing. */
+case class StopRouting(timestamp: Date, user: UserId) extends DrivingEvent
 
 /** An event triggered by a user when needing help. */
 case class SOSAlert(timestamp: Date, user: UserId, position: GPSLocation) extends DrivingEvent
@@ -27,6 +30,3 @@ case class Tracking(timestamp: Date, user: UserId, position: GPSLocation) extend
 
 /** An event triggered by a user when stopping the SOS alert. */
 case class StopSOS(timestamp: Date, user: UserId) extends DrivingEvent
-
-/** An event triggered by a user when stopping the routing. */
-case class StopRouting(timestamp: Date, user: UserId) extends DrivingEvent

@@ -46,7 +46,7 @@ object RealTimeUserTracker:
 
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case ev: StartRouting => State(Routing, Some(Route(ev)), state.lastSample)
+      case ev: RoutingStarted => State(Routing, Some(Route(ev)), state.lastSample)
       case ev: SOSAlert => ??? // State(SOS, Some(Route(ev)), state.lastSample)
       case ev: Tracking => State(Active, None, Some(ev))
       case ev: StopSOS => State(Active, None, state.lastSample)
@@ -56,11 +56,11 @@ object RealTimeUserTracker:
     (state, command) =>
       command match
         case ev: Tracking => trackingHandler(ctx)(state, ev)
-        case ev: StartRouting => routingHandler(state, ev)
+        case ev: RoutingStarted => routingHandler(state, ev)
         case ev: StopRouting => routingHandler(state, ev)
         case _ => Effect.none
 
-  private val routingHandler: (State, StartRouting | StopRouting) => Effect[DrivingEvent, State] =
+  private val routingHandler: (State, RoutingStarted | StopRouting) => Effect[DrivingEvent, State] =
     (_, event) => Effect.persist(event)
 
   private def trackingHandler(ctx: ActorContext[Command]): (State, Tracking) => Effect[DrivingEvent, State] =

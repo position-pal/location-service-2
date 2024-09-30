@@ -10,7 +10,7 @@ import io.github.positionpal.location.domain.{
   GPSLocation,
   Route,
   RoutingMode,
-  StartRouting,
+  RoutingStarted,
   Tracking,
   UserId,
 }
@@ -29,7 +29,7 @@ trait Codecs:
 
   given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
 
-  given startRoutingCodec: Codec[StartRouting] = deriveCodec[StartRouting]
+  given startRoutingCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
 
   given trackingRouting: Codec[Tracking] = deriveCodec[Tracking]
 
@@ -39,11 +39,11 @@ trait Codecs:
 
   given routeDecoder: Decoder[Route] = Decoder: reader =>
     reader.readMapHeader()
-    var sourceEvent: Option[StartRouting] = None
+    var sourceEvent: Option[RoutingStarted] = None
     var positions: List[GPSLocation] = Nil
     for _ <- 0 until 2 do
       reader.readString() match
-        case "sourceEvent" => sourceEvent = Some(reader.read[StartRouting]())
+        case "sourceEvent" => sourceEvent = Some(reader.read[RoutingStarted]())
         case "positions" => positions = reader.read[List[GPSLocation]]()
         case _ => ???
     Route.withPositions(sourceEvent.get, positions)

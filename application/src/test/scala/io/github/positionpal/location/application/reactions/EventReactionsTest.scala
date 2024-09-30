@@ -14,7 +14,7 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
 
   import java.util.Date
 
-  private val route = Route(StartRouting(Date(), UserId("test"), Driving, GPSLocation(0.0, 0.0), Date()))
+  private val route = Route(RoutingStarted(Date(), UserId("test"), Driving, GPSLocation(0.0, 0.0), Date()))
   private val event: Tracking = Tracking(Date(), UserId("test"), GPSLocation(0.1, 0.1))
 
   describe("`TrackingEventReaction`s"):

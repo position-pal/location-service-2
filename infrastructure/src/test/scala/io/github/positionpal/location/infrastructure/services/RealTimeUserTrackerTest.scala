@@ -3,6 +3,7 @@ package io.github.positionpal.location.infrastructure.services
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import com.typesafe.config.{Config, ConfigFactory}
+import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.{Active, Inactive, Routing}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
@@ -27,41 +28,42 @@ class RealTimeUserTrackerTest
     eventSourcedTestKit.clear()
 
   private val user = UserId("user-test")
-  private val trackingEvent = Tracking(now, user, cesenaCampusLocation)
 
-  "RealTimeUserTracker" should:
-    "be initialized with an inactive state and empty tracking" in:
-      val state = eventSourcedTestKit.getState()
-      state.userState shouldBe Inactive
-      state.route shouldBe None
-      state.lastSample shouldBe None
+  "RealTimeUserTracker" when:
+    "initialized" should:
+      "have an empty state" in:
+        eventSourcedTestKit.getState() shouldMatch (Inactive, None, None)
 
-    "accept as commands tracking events" in:
-      eventSourcedTestKit.runCommand(StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
+      "accept tracking events" in:
+        eventSourcedTestKit
+          .runCommand(RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
 
-    "save the last tracking event and change its user state if a tracking event is received" in:
-      eventSourcedTestKit.runCommand(trackingEvent).events should contain only trackingEvent
-      val state = eventSourcedTestKit.getState()
-      state.userState shouldBe Active
-      state.route shouldBe None
-      state.lastSample shouldBe Some(trackingEvent)
+    "in active state" should:
+      "update the last location sample" in:
+        val tracking = Tracking(now, user, cesenaCampusLocation)
+        eventSourcedTestKit.runCommand(tracking).events should contain only tracking
+        eventSourcedTestKit.getState() shouldMatch (Active, None, Some(tracking))
 
-    "update the routing information if a routing is started" in:
-      eventSourcedTestKit.runCommand(trackingEvent)
-      val startRoutingEvent = StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
-      eventSourcedTestKit.runCommand(startRoutingEvent).events should contain only startRoutingEvent
-      val state = eventSourcedTestKit.getState()
-      state.userState shouldBe Routing
-      state.route shouldBe Some(Route(startRoutingEvent))
-      state.lastSample shouldBe Some(trackingEvent)
+      "transition to routing mode if a routing is started" in:
+        val tracking = Tracking(now, user, cesenaCampusLocation)
+        eventSourcedTestKit.runCommand(tracking)
+        val startRoutingEvent = RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
+        eventSourcedTestKit.runCommand(startRoutingEvent).events should contain only startRoutingEvent
+        eventSourcedTestKit.getState() shouldMatch (Routing, Some(Route(startRoutingEvent)), Some(tracking))
 
-    "handle the tracking event on routing" in:
-      eventSourcedTestKit.runCommand(StartRouting(now, user, RoutingMode.Driving, cesenaCampusLocation, now))
-      Thread.sleep(1000)
-      val result = eventSourcedTestKit.runCommand(trackingEvent)
-      println(result.events)
-      println(result.state)
-      Thread.sleep(5_000)
+  extension (s: State)
+    infix def shouldMatch(userState: UserState, route: Option[Route], lastSample: Option[Tracking]): Unit =
+      s.userState shouldBe userState
+      s.route shouldBe route
+      s.lastSample shouldBe lastSample
+
+//    "handle the tracking event on routing" in:
+//      eventSourcedTestKit.runCommand(RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, now))
+//      Thread.sleep(1000)
+//      val result = eventSourcedTestKit.runCommand(locationSampleAtCesena)
+//      println(result.events)
+//      println(result.state)
+//      Thread.sleep(5_000)
 
 object RealTimeUserTrackerTest:
   val config: Config = ConfigFactory.parseString("""

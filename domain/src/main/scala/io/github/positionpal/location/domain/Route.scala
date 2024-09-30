@@ -4,8 +4,8 @@ import scala.annotation.targetName
 
 /** The route followed by a [[User]] while going from one place to another. */
 trait Route:
-  /** @return the [[StartRouting]] event originating the route, encapsulating all the routing information. */
-  def sourceEvent: StartRouting
+  /** @return the [[RoutingStarted]] event originating the route, encapsulating all the routing information. */
+  def sourceEvent: RoutingStarted
 
   /** @return the list of positions composing this route, in reverse chronological order,
     *         i.e., from the most recent to the oldest (the most recent is in the head).
@@ -17,11 +17,11 @@ trait Route:
 
 object Route:
 
-  def apply(event: StartRouting): Route = RouteImpl(event, List())
+  def apply(event: RoutingStarted): Route = RouteImpl(event, List())
 
-  def withPositions(event: StartRouting, positions: List[GPSLocation]): Route = RouteImpl(event, positions)
+  def withPositions(event: RoutingStarted, positions: List[GPSLocation]): Route = RouteImpl(event, positions)
 
-  private case class RouteImpl(sourceEvent: StartRouting, positions: List[GPSLocation]) extends Route:
+  private case class RouteImpl(sourceEvent: RoutingStarted, positions: List[GPSLocation]) extends Route:
     @targetName("addSample")
     override def +(sample: GPSLocation): Route =
       withPositions(sourceEvent, sample +: positions)
