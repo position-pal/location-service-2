@@ -1,5 +1,6 @@
 [versions]
 akka = "2.9.5"
+borer = "1.14.1"
 circe = "0.14.9"
 http4s = "1.0.0-M41"
 junit = "1.11.0"
@@ -12,10 +13,12 @@ scalatest = "3.3.0-SNAP4"
 akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
 akka-cluster-typed = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding-typed = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
-akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
 akka-persistence-r2dbc = "com.lightbend.akka:akka-persistence-r2dbc_3:1.2.5"
+akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
 akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
 akka-serialization-jackson = { module = "com.typesafe.akka:akka-serialization-jackson_3", version.ref = "akka" }
+borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
+borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
 cats-core = "org.typelevel:cats-core_3:2.12.0"
 cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
 cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
@@ -38,12 +41,9 @@ scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.0"
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
-zio = "dev.zio:zio_3:2.1.9"
-zio-actors = "dev.zio:zio-actors_2.13:0.1.0"
-zio-actors-persistence = "dev.zio:zio-actors-persistence_2.13:0.1.0"
-zio-akka-cluster = "dev.zio:zio-akka-cluster_2.13:0.3.0"
 
 [bundles]
+borer = [ "borer-core", "borer-derivation" ]
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]
 circe = [ "circe-core", "circe-generic", "circe-parser" ]
 http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
@@ -59,6 +59,5 @@ scala-testing = [
 ]
 
 [plugins]
-akka-grpc = "com.lightbend.akka.grpc.gradle:2.4.3"
 cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.1"

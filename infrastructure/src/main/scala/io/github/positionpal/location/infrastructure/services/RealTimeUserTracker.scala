@@ -9,8 +9,6 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
-import io.bullet.borer.Codec
-import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
 import io.github.positionpal.location.application.reactions.*
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.Notification
 import io.github.positionpal.location.application.services.UserState
@@ -59,9 +57,10 @@ object RealTimeUserTracker:
       command match
         case ev: Tracking => trackingHandler(ctx)(state, ev)
         case ev: StartRouting => routingHandler(state, ev)
+        case ev: StopRouting => routingHandler(state, ev)
         case _ => Effect.none
 
-  private val routingHandler: (State, StartRouting) => Effect[DrivingEvent, State] =
+  private val routingHandler: (State, StartRouting | StopRouting) => Effect[DrivingEvent, State] =
     (_, event) => Effect.persist(event)
 
   private def trackingHandler(ctx: ActorContext[Command]): (State, Tracking) => Effect[DrivingEvent, State] =
@@ -96,13 +95,3 @@ object RealTimeUserTracker:
       checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- checks(route, event).value.run(config)
     yield result.flatten
-
-class BorerAkkaSerializer extends CborAkkaSerializer with Codecs:
-  override def identifier: Int = 19923
-
-  given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
-  given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
-
-  register[RealTimeUserTracker.Ignore.type]()
-  register[DrivingEvent]()
-  register[RealTimeUserTracker.State]()

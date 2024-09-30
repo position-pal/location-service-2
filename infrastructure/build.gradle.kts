@@ -6,9 +6,7 @@ dependencies {
     implementation(libs.akka.cluster.sharding.typed)
     implementation(libs.akka.persistence.typed)
     implementation(libs.akka.persistence.r2dbc)
-    implementation(libs.akka.serialization.jackson)
     implementation(libs.logback.classic)
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
-    implementation("com.fasterxml.jackson.module:jackson-module-scala_3:2.18.0")
 }
