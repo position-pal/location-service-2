@@ -11,7 +11,7 @@ import io.github.positionpal.location.domain.{
   Route,
   RoutingMode,
   RoutingStarted,
-  Tracking,
+  SampledLocation,
   UserId,
 }
 
@@ -31,7 +31,7 @@ trait Codecs:
 
   given startRoutingCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
 
-  given trackingRouting: Codec[Tracking] = deriveCodec[Tracking]
+  given trackingRouting: Codec[SampledLocation] = deriveCodec[SampledLocation]
 
   given routeEncoder: Encoder[Route] = Encoder: (writer, route) =>
     writer.writeMapHeader(2).writeString("sourceEvent").write(route.sourceEvent).writeString("positions")

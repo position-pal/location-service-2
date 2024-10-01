@@ -40,12 +40,12 @@ class RealTimeUserTrackerTest
 
     "in active state" should:
       "update the last location sample" in:
-        val tracking = Tracking(now, user, cesenaCampusLocation)
+        val tracking = SampledLocation(now, user, cesenaCampusLocation)
         eventSourcedTestKit.runCommand(tracking).events should contain only tracking
         eventSourcedTestKit.getState() shouldMatch (Active, None, Some(tracking))
 
       "transition to routing mode if a routing is started" in:
-        val tracking = Tracking(now, user, cesenaCampusLocation)
+        val tracking = SampledLocation(now, user, cesenaCampusLocation)
         eventSourcedTestKit.runCommand(tracking)
         val startRoutingEvent = RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
         eventSourcedTestKit.runCommand(startRoutingEvent).events should contain only startRoutingEvent
@@ -53,9 +53,9 @@ class RealTimeUserTrackerTest
 
     "in routing state" should:
       "track the user position" in:
-        val trace = Tracking(now, user, GPSLocation(44.139, 12.243))
-          :: Tracking(now, user, GPSLocation(44.140, 12.244))
-          :: Tracking(now, user, GPSLocation(44.141, 12.245))
+        val trace = SampledLocation(now, user, GPSLocation(44.139, 12.243))
+          :: SampledLocation(now, user, GPSLocation(44.140, 12.244))
+          :: SampledLocation(now, user, GPSLocation(44.141, 12.245))
           :: Nil
         eventSourcedTestKit
           .runCommand(RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
@@ -64,7 +64,7 @@ class RealTimeUserTrackerTest
         Thread.sleep(5_000)
 
   extension (s: State)
-    infix def shouldMatch(userState: UserState, route: Option[Route], lastSample: Option[Tracking]): Unit =
+    infix def shouldMatch(userState: UserState, route: Option[Route], lastSample: Option[SampledLocation]): Unit =
       s.userState shouldBe userState
       s.route shouldBe route
       s.lastSample shouldBe lastSample

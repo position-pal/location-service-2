@@ -26,7 +26,8 @@ object RealTimeUserTracker:
   type Command = DrivingEvent | Ignore.type
   type Event = DrivingEvent
 
-  final case class State(userState: UserState, route: Option[Route], lastSample: Option[Tracking]) extends Serializable
+  final case class State(userState: UserState, route: Option[Route], lastSample: Option[SampledLocation])
+      extends Serializable
   object State:
     def empty: State = State(UserState.Inactive, None, None)
 
@@ -47,27 +48,27 @@ object RealTimeUserTracker:
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
       case ev: RoutingStarted => State(Routing, Some(Route(ev)), state.lastSample)
-      case ev: SOSAlert => ??? // State(SOS, Some(Route(ev)), state.lastSample)
-      case ev: Tracking =>
+      case ev: SOSAlertTriggered => ??? // State(SOS, Some(Route(ev)), state.lastSample)
+      case ev: SampledLocation =>
         state match
           case State(Routing, Some(route), _) => State(Routing, Some(route + ev.position), Some(ev))
           case State(SOS, _, _) => ???
           case _ => State(Active, None, Some(ev))
-      case ev: StopSOS => State(Active, None, state.lastSample)
-      case ev: StopRouting => State(Active, None, state.lastSample)
+      case ev: SOSAlertStopped => State(Active, None, state.lastSample)
+      case ev: RoutingStopped => State(Active, None, state.lastSample)
 
   private def commandHandler(ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
     (state, command) =>
       command match
-        case ev: Tracking => trackingHandler(ctx)(state, ev)
+        case ev: SampledLocation => trackingHandler(ctx)(state, ev)
         case ev: RoutingStarted => routingHandler(state, ev)
-        case ev: StopRouting => routingHandler(state, ev)
+        case ev: RoutingStopped => routingHandler(state, ev)
         case _ => Effect.none
 
-  private val routingHandler: (State, RoutingStarted | StopRouting) => Effect[DrivingEvent, State] =
+  private val routingHandler: (State, RoutingStarted | RoutingStopped) => Effect[DrivingEvent, State] =
     (_, event) => Effect.persist(event)
 
-  private def trackingHandler(ctx: ActorContext[Command]): (State, Tracking) => Effect[DrivingEvent, State] =
+  private def trackingHandler(ctx: ActorContext[Command]): (State, SampledLocation) => Effect[DrivingEvent, State] =
     (state, event) =>
       state match
         case State(Routing, Some(route), _) =>
@@ -80,7 +81,7 @@ object RealTimeUserTracker:
           Effect.persist(event)
         case _ => Effect.persist(event)
 
-  private def reaction(route: Route, event: Tracking) =
+  private def reaction(route: Route, event: SampledLocation) =
     for
       config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
       checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
@@ -98,7 +99,7 @@ object RealTimeUserTracker:
       Ignore
     case Left(Notification.Success(msg)) =>
       ctx.log.debug(msg)
-      StopRouting(event.timestamp, event.user)
+      RoutingStopped(event.timestamp, event.user)
     case Left(e) =>
       ctx.log.error(e.toString)
       Ignore

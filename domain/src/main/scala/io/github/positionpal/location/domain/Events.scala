@@ -19,14 +19,14 @@ case class RoutingStarted(
     expectedArrival: Date,
 ) extends DrivingEvent
 
-/** An event triggered by a user when stopping the routing. */
-case class StopRouting(timestamp: Date, user: UserId) extends DrivingEvent
+/** An event triggered to stop an active route. */
+case class RoutingStopped(timestamp: Date, user: UserId) extends DrivingEvent
 
 /** An event triggered by a user when needing help. */
-case class SOSAlert(timestamp: Date, user: UserId, position: GPSLocation) extends DrivingEvent
+case class SOSAlertTriggered(timestamp: Date, user: UserId, position: GPSLocation) extends DrivingEvent
 
 /** An event triggered regularly on behalf of a user, tracking its position. */
-case class Tracking(timestamp: Date, user: UserId, position: GPSLocation) extends DrivingEvent
+case class SampledLocation(timestamp: Date, user: UserId, position: GPSLocation) extends DrivingEvent
 
 /** An event triggered by a user when stopping the SOS alert. */
-case class StopSOS(timestamp: Date, user: UserId) extends DrivingEvent
+case class SOSAlertStopped(timestamp: Date, user: UserId) extends DrivingEvent
