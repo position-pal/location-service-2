@@ -48,7 +48,11 @@ object RealTimeUserTracker:
     event match
       case ev: RoutingStarted => State(Routing, Some(Route(ev)), state.lastSample)
       case ev: SOSAlert => ??? // State(SOS, Some(Route(ev)), state.lastSample)
-      case ev: Tracking => State(Active, None, Some(ev))
+      case ev: Tracking =>
+        state match
+          case State(Routing, Some(route), _) => State(Routing, Some(route + ev.position), Some(ev))
+          case State(SOS, _, _) => ???
+          case _ => State(Active, None, Some(ev))
       case ev: StopSOS => State(Active, None, state.lastSample)
       case ev: StopRouting => State(Active, None, state.lastSample)
 
@@ -68,20 +72,7 @@ object RealTimeUserTracker:
       state match
         case State(Routing, Some(route), _) =>
           ctx.pipeToSelf(reaction(route, event).unsafeToFuture()):
-            case Success(value) =>
-              value match
-                case Right(_) =>
-                  ctx.log.debug("Routing continuing...")
-                  Ignore
-                case Left(Notification.Alert(msg)) =>
-                  ctx.log.debug(msg)
-                  Ignore
-                case Left(Notification.Success(msg)) =>
-                  ctx.log.debug(msg)
-                  StopRouting(event.timestamp, event.user)
-                case Left(mapError: String) =>
-                  ctx.log.error(mapError)
-                  Ignore
+            case Success(result) => reactionHandler(ctx)(event)(result)
             case Failure(exception) =>
               ctx.log.error(exception.getMessage)
               Ignore
@@ -95,3 +86,19 @@ object RealTimeUserTracker:
       checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
       result <- checks(route, event).value.run(config)
     yield result.flatten
+
+  private def reactionHandler(ctx: ActorContext[Command])(event: Event)(
+      result: Either[java.io.Serializable, TrackingEventReaction.Continue.type],
+  ): Command = result match
+    case Right(_) =>
+      ctx.log.debug("Routing continuing...")
+      Ignore
+    case Left(Notification.Alert(msg)) =>
+      ctx.log.debug(msg)
+      Ignore
+    case Left(Notification.Success(msg)) =>
+      ctx.log.debug(msg)
+      StopRouting(event.timestamp, event.user)
+    case Left(e) =>
+      ctx.log.error(e.toString)
+      Ignore

@@ -51,6 +51,18 @@ class RealTimeUserTrackerTest
         eventSourcedTestKit.runCommand(startRoutingEvent).events should contain only startRoutingEvent
         eventSourcedTestKit.getState() shouldMatch (Routing, Some(Route(startRoutingEvent)), Some(tracking))
 
+    "in routing state" should:
+      "track the user position" in:
+        val trace = Tracking(now, user, GPSLocation(44.139, 12.243))
+          :: Tracking(now, user, GPSLocation(44.140, 12.244))
+          :: Tracking(now, user, GPSLocation(44.141, 12.245))
+          :: Nil
+        eventSourcedTestKit
+          .runCommand(RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, inTheFuture))
+        trace.foreach(eventSourcedTestKit.runCommand(_))
+        println(eventSourcedTestKit.getState())
+        Thread.sleep(5_000)
+
   extension (s: State)
     infix def shouldMatch(userState: UserState, route: Option[Route], lastSample: Option[Tracking]): Unit =
       s.userState shouldBe userState
