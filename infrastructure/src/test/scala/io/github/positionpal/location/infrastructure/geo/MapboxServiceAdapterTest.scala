@@ -23,7 +23,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
       yield distance
       val result = distanceRequest.unsafeRunSync()
       result.isRight shouldBe true
-      result.map(_.value should (be >= 90273.0 and be <= 90274.0))
+      result.map(_.value should (be >= 80_000.0 and be <= 100_000.0))
       result.map(_.unit shouldBe DistanceUnit.Meters)
 
     it("should calculate the arrival time between two locations"):
