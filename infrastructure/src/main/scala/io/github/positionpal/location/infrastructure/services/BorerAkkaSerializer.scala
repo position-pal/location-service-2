@@ -9,9 +9,9 @@ import io.github.positionpal.location.presentation.{BorerCborAkkaSerializer, Cod
 class BorerAkkaSerializer extends BorerCborAkkaSerializer with Codecs:
   override def identifier: Int = 19923
 
-  given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
+  // given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
 
   register[RealTimeUserTracker.Ignore.type]()
   register[DrivingEvent]()
-  register[RealTimeUserTracker.State]()
+  // register[RealTimeUserTracker.State]()

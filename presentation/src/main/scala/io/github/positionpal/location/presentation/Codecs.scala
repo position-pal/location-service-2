@@ -5,15 +5,7 @@ import java.util.Date
 import io.bullet.borer.derivation.ArrayBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
 import io.github.positionpal.location.application.services.UserState
-import io.github.positionpal.location.domain.{
-  DrivingEvent,
-  GPSLocation,
-  Route,
-  RoutingMode,
-  RoutingStarted,
-  SampledLocation,
-  UserId,
-}
+import io.github.positionpal.location.domain.*
 
 /** Provides codecs for the domain model and application services. */
 trait Codecs:
@@ -29,21 +21,20 @@ trait Codecs:
 
   given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
 
-  given startRoutingCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
+  given routingStartedCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
 
-  given trackingRouting: Codec[SampledLocation] = deriveCodec[SampledLocation]
+  given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
 
-  given routeEncoder: Encoder[Route] = Encoder: (writer, route) =>
-    writer.writeMapHeader(2).writeString("sourceEvent").write(route.sourceEvent).writeString("positions")
-      .write(route.positions)
-
-  given routeDecoder: Decoder[Route] = Decoder: reader =>
-    reader.readMapHeader()
-    var sourceEvent: Option[RoutingStarted] = None
-    var positions: List[GPSLocation] = Nil
-    for _ <- 0 until 2 do
-      reader.readString() match
-        case "sourceEvent" => sourceEvent = Some(reader.read[RoutingStarted]())
-        case "positions" => positions = reader.read[List[GPSLocation]]()
-        case _ => ???
-    Route.withPositions(sourceEvent.get, positions)
+//  given routeEncoder: Encoder[Route] = Encoder: (writer, route) =>
+//    writer.writeMapHeader(2).writeString("sourceEvent").write(route.sourceEvent).writeString("positions")
+//      .write(route.positions)
+//
+//  given routeDecoder: Decoder[Route] = Decoder: reader =>
+//    reader.readMapHeader()
+//    var sourceEvent: Option[RoutingStarted] = None
+//    var positions: List[GPSLocation] = Nil
+//    for _ <- 0 until 2 do
+//      reader.readString() match
+//        case "sourceEvent" => sourceEvent = Some(reader.read[RoutingStarted]())
+//        case "positions" => positions = reader.read[List[GPSLocation]]()
+//    Route.withPositions(sourceEvent.get, positions)
