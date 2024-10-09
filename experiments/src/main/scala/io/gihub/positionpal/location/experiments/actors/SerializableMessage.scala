@@ -1,4 +1,4 @@
-package io.gihub.positionpal.location.experiments
+package io.gihub.positionpal.location.experiments.actors
 
 trait SerializableMessage
 

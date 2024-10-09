@@ -1,0 +1,10 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package io.github.positionpal.location.experiments.kafka;
+
+message SampledLocation {
+  int64 userId = 1;
+  double latitude = 2;
+  double longitude = 3;
+}

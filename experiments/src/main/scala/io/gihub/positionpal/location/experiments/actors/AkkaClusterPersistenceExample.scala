@@ -1,12 +1,11 @@
-package io.gihub.positionpal.location.experiments
-
-import scala.concurrent.duration.DurationInt
-import scala.util.{Random, Success}
+package io.gihub.positionpal.location.experiments.actors
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import cats.effect.IO
-import io.gihub.positionpal.location.experiments.NopeActor.Message
+
+import scala.concurrent.duration.DurationInt
+import scala.util.{Random, Success}
 
 object NopeActor:
 
@@ -40,9 +39,9 @@ object NopeActor:
   val actorSystemRes = startup(NopeActor())
   actorSystemRes.use { actorSystem =>
     IO(actorSystem.log.info("Hello from cats effects dispatcher"))
-      *> IO(actorSystem ! Message("Hello World"))
+      *> IO(actorSystem ! NopeActor.Message("Hello World"))
       *> IO.sleep(5.seconds)
-      *> IO(actorSystem ! Message("Another message"))
+      *> IO(actorSystem ! NopeActor.Message("Another message"))
       *> IO.sleep(5.seconds)
       *> IO(actorSystem.terminate())
   }.unsafeRunSync()

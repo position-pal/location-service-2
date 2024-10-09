@@ -1,8 +1,4 @@
-package io.gihub.positionpal.location.experiments
-
-import scala.concurrent.duration.{Duration, DurationInt}
-import scala.concurrent.{Await, Future}
-import scala.util.Random
+package io.gihub.positionpal.location.experiments.actors
 
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
@@ -13,6 +9,11 @@ import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.serialization.jackson.CborSerializable
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import io.gihub.positionpal.location.experiments.SerializableMessage
+
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.{Await, Future}
+import scala.util.Random
 
 object User:
 

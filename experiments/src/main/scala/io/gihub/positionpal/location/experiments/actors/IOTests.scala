@@ -1,9 +1,9 @@
-package io.gihub.positionpal.location.experiments
-
-import scala.concurrent.{Await, Future}
+package io.gihub.positionpal.location.experiments.actors
 
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
+
+import scala.concurrent.{Await, Future}
 
 object IOTests extends App:
 

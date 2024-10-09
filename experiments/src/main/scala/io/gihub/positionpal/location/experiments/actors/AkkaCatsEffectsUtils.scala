@@ -1,10 +1,9 @@
-package io.gihub.positionpal.location.experiments
+package io.gihub.positionpal.location.experiments.actors
 
 import akka.actor.BootstrapSetup
 import akka.actor.typed.{ActorSystem, Behavior}
 import cats.effect.{IO, Resource}
 import com.typesafe.config.ConfigFactory
-import io.gihub.positionpal.location.experiments.NopeActor.Message
 
 def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
   Resource:
@@ -21,4 +20,4 @@ def startup[T](behavior: => Behavior[T]): Resource[IO, ActorSystem[T]] =
   */
 @main def simpleWithoutIO(): Unit =
   val actorSystem = ActorSystem(NopeActor(), "ClusterSystem", ConfigFactory.load("application"))
-  actorSystem ! Message("Hello")
+  actorSystem ! NopeActor.Message("Hello")
