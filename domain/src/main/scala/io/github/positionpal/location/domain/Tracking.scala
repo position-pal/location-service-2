@@ -2,7 +2,7 @@ package io.github.positionpal.location.domain
 
 import java.util.Date
 
-type Route = List[SampledLocation]
+type Route = LazyList[SampledLocation]
 
 trait Tracking:
   def route: Route
@@ -21,17 +21,17 @@ enum RoutingMode:
 
 object Tracking:
 
-  def apply(userId: UserId): Tracking = TrackingImpl(List(), userId)
+  def apply(userId: UserId): Tracking = TrackingImpl(LazyList(), userId)
 
   def withMonitoring(
       userId: UserId,
       routingMode: RoutingMode,
       arrivalLocation: GPSLocation,
       estimatedArrival: Date,
-  ): MonitorableTracking = MonitorableTrackingImpl(List(), userId, routingMode, arrivalLocation, estimatedArrival)
+  ): MonitorableTracking = MonitorableTrackingImpl(LazyList(), userId, routingMode, arrivalLocation, estimatedArrival)
 
   private class TrackingImpl(override val route: Route, override val user: UserId) extends Tracking:
-    override def addSample(sample: SampledLocation): Tracking = TrackingImpl(sample :: route, user)
+    override def addSample(sample: SampledLocation): Tracking = TrackingImpl(sample #:: route, user)
 
   private class MonitorableTrackingImpl(
       override val route: Route,
@@ -41,4 +41,4 @@ object Tracking:
       override val expectedArrival: Date,
   ) extends MonitorableTracking:
     override def addSample(sample: SampledLocation): MonitorableTracking =
-      MonitorableTrackingImpl(sample :: route, user, mode, destination, expectedArrival)
+      MonitorableTrackingImpl(sample #:: route, user, mode, destination, expectedArrival)
