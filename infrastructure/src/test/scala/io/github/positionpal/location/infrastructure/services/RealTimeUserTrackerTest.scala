@@ -6,6 +6,9 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.infrastructure.GeoUtils.*
+import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -25,56 +28,65 @@ class RealTimeUserTrackerTest
     super.beforeEach()
     eventSourcedTestKit.clear()
 
-//  private val user = UserId("user-test")
+  private val testUser = UserId("user-test")
 
   "RealTimeUserTracker" when:
     "initialized" should:
       "have an empty state" in:
         eventSourcedTestKit.getState() shouldMatch (Inactive, None, None)
 
-//    "in active state" should:
-//      "update the last location sample" in:
-//        val sample = SampledLocation(now, user, cesenaCampusLocation)
-//        eventSourcedTestKit.runCommand(sample).events should contain only sample
-//        eventSourcedTestKit.getState() shouldMatch (Active, None, Some(sample))
-//
-//      "transition to routing mode if a routing is started" in:
-//        val lastSample = SampledLocation(now, user, cesenaCampusLocation)
-//        eventSourcedTestKit.runCommand(lastSample)
-//        val routingStarted = RoutingStarted(now, user, Driving, cesenaCampusLocation, inTheFuture)
-//        eventSourcedTestKit.runCommand(routingStarted).events should contain only routingStarted
-//        eventSourcedTestKit.getState() shouldMatch (Routing, Some(Route(routingStarted)), Some(lastSample))
-//
-//      "transition to sos mode if an sos alert is triggered" in:
-//        val sosTriggered = SOSAlertTriggered(now, user, cesenaCampusLocation)
-//        eventSourcedTestKit.runCommand(sosTriggered)
-//        eventSourcedTestKit.getState() shouldMatch (SOS, Some(Route(sosTriggered)), None)
-//        ???
-//
-//    "in routing state" should:
-//      "track the user position" in:
-//        val trace = SampledLocation(now, user, GPSLocation(44.139, 12.243))
-//          :: SampledLocation(now, user, GPSLocation(44.140, 12.244))
-//          :: SampledLocation(now, user, GPSLocation(44.141, 12.245))
-//          :: Nil
-//        eventSourcedTestKit.runCommand(RoutingStarted(now, user, Driving, cesenaCampusLocation, inTheFuture))
-//        trace.foreach(eventSourcedTestKit.runCommand(_))
-//        println(eventSourcedTestKit.getState())
-//        Thread.sleep(5_000)
+    "in active state" should:
+      "update the last location sample" in:
+        val sample = SampledLocation(now, testUser, cesenaCampusLocation)
+        eventSourcedTestKit.runCommand(sample).events should contain only sample
+        eventSourcedTestKit.getState() shouldMatch (Active, None, Some(sample))
+
+      "transition to routing mode if a routing is started" in:
+        val lastSample = SampledLocation(now, testUser, cesenaCampusLocation)
+        eventSourcedTestKit.runCommand(lastSample)
+        val routingStarted = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
+        eventSourcedTestKit.runCommand(routingStarted).events should contain only routingStarted
+        eventSourcedTestKit.getState() shouldMatch (
+          Routing,
+          Some(
+            Tracking.withMonitoring(
+              routingStarted.user,
+              routingStarted.mode,
+              routingStarted.destination,
+              routingStarted.expectedArrival,
+            ),
+          ),
+          Some(lastSample),
+        )
+
+      "transition to sos mode if an sos alert is triggered" in:
+        val sosTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
+        eventSourcedTestKit.runCommand(sosTriggered)
+        eventSourcedTestKit.getState() shouldMatch (
+          SOS,
+          Some(Tracking(sosTriggered.user)),
+          Some(SampledLocation(sosTriggered.timestamp, sosTriggered.user, sosTriggered.position)),
+        )
+
+      "transition to inactive mode after some time not receiving any event" ignore:
+        ???
+
+    "in routing state" should:
+      "track the user position" ignore:
+        val trace = SampledLocation(now, testUser, GPSLocation(44.139, 12.243))
+          :: SampledLocation(now, testUser, GPSLocation(44.140, 12.244))
+          :: SampledLocation(now, testUser, GPSLocation(44.141, 12.245))
+          :: Nil
+        eventSourcedTestKit.runCommand(RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture))
+        trace.foreach(eventSourcedTestKit.runCommand(_))
+        println(eventSourcedTestKit.getState())
+        Thread.sleep(5_000)
 
   extension (s: State)
     infix def shouldMatch(userState: UserState, route: Option[Tracking], lastSample: Option[SampledLocation]): Unit =
       s.userState shouldBe userState
-      s.route shouldBe route
+      s.tracking shouldBe route
       s.lastSample shouldBe lastSample
-
-//    "handle the tracking event on routing" in:
-//      eventSourcedTestKit.runCommand(RoutingStarted(now, user, RoutingMode.Driving, cesenaCampusLocation, now))
-//      Thread.sleep(1000)
-//      val result = eventSourcedTestKit.runCommand(locationSampleAtCesena)
-//      println(result.events)
-//      println(result.state)
-//      Thread.sleep(5_000)
 
 object RealTimeUserTrackerTest:
   val config: Config = ConfigFactory.parseString("""

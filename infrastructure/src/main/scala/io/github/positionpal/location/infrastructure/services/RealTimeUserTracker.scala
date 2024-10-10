@@ -20,9 +20,13 @@ object RealTimeUserTracker:
 
   type Command = DrivingEvent | Ignore.type
   type Event = DrivingEvent
+  type T = Tracking | MonitorableTracking
 
-  final case class State(userState: UserState, route: Option[Tracking], lastSample: Option[SampledLocation])
-      extends Serializable
+  final case class State(
+      userState: UserState,
+      tracking: Option[T],
+      lastSample: Option[SampledLocation],
+  ) extends Serializable
   object State:
     def empty: State = State(UserState.Inactive, None, None)
 
@@ -40,8 +44,14 @@ object RealTimeUserTracker:
 
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case ev: RoutingStarted => ??? // State(Routing, Some(Route(ev)), state.lastSample)
-      case ev: SOSAlertTriggered => ??? // State(SOS, Some(Route(ev)), state.lastSample)
+      case ev: RoutingStarted =>
+        State(
+          Routing,
+          Some(Tracking.withMonitoring(ev.user, ev.mode, ev.destination, ev.expectedArrival)),
+          state.lastSample,
+        )
+      case ev: SOSAlertTriggered =>
+        State(SOS, Some(Tracking(ev.user)), Some(SampledLocation(ev.timestamp, ev.user, ev.position)))
       case ev: SampledLocation =>
         state match
           // case State(Routing, Some(route), _) => State(Routing, Some(route + ev.position), Some(ev))
@@ -54,11 +64,14 @@ object RealTimeUserTracker:
     (state, command) =>
       command match
         case ev: SampledLocation => trackingHandler(ctx)(state, ev)
-        case ev: RoutingStarted => routingHandler(state, ev)
-        case ev: RoutingStopped => routingHandler(state, ev)
+        case ev: (RoutingStarted | RoutingStopped) => routingHandler(state, ev)
+        case ev: SOSAlertTriggered => sosHandler(state, ev)
         case _ => Effect.none
 
   private val routingHandler: (State, RoutingStarted | RoutingStopped) => Effect[DrivingEvent, State] =
+    (_, event) => Effect.persist(event)
+
+  private val sosHandler: (State, SOSAlertTriggered) => Effect[DrivingEvent, State] =
     (_, event) => Effect.persist(event)
 
   private def trackingHandler(ctx: ActorContext[Command]): (State, SampledLocation) => Effect[DrivingEvent, State] =
