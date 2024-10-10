@@ -1,15 +1,21 @@
 package io.github.positionpal.location.infrastructure.services
 
+import scala.util.{Failure, Success}
+
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
+import akka.cluster.sharding.typed.scaladsl.*
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import io.github.positionpal.location.application.reactions.*
+import io.github.positionpal.location.application.reactions.TrackingEventReaction.Notification
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.EventConversions.{*, given}
+import io.github.positionpal.location.infrastructure.geo.*
 
 object RealTimeUserTracker:
 
@@ -44,68 +50,54 @@ object RealTimeUserTracker:
 
   private val eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case ev: RoutingStarted =>
-        State(
-          Routing,
-          Some(Tracking.withMonitoring(ev.user, ev.mode, ev.destination, ev.expectedArrival)),
-          state.lastSample,
-        )
-      case ev: SOSAlertTriggered =>
-        State(SOS, Some(Tracking(ev.user)), Some(SampledLocation(ev.timestamp, ev.user, ev.position)))
+      case ev: RoutingStarted => State(Routing, Some(ev.toMonitorableTracking), state.lastSample)
+      case ev: SOSAlertTriggered => State(SOS, Some(Tracking(ev.user)), Some(ev))
       case ev: SampledLocation =>
         state match
-          // case State(Routing, Some(route), _) => State(Routing, Some(route + ev.position), Some(ev))
-          case State(SOS, _, _) => ???
+          case State(Routing | SOS, Some(tracking), _) => State(Routing, Some(tracking + ev), Some(ev))
           case _ => State(Active, None, Some(ev))
-      case ev: SOSAlertStopped => State(Active, None, state.lastSample)
-      case ev: RoutingStopped => State(Active, None, state.lastSample)
+      case _: (SOSAlertStopped | RoutingStopped) => State(Active, None, state.lastSample)
 
   private def commandHandler(ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
-    (state, command) =>
-      command match
-        case ev: SampledLocation => trackingHandler(ctx)(state, ev)
-        case ev: (RoutingStarted | RoutingStopped) => routingHandler(state, ev)
-        case ev: SOSAlertTriggered => sosHandler(state, ev)
-        case _ => Effect.none
+    (state, command) => command match
+      case ev: SampledLocation => trackingHandler(ctx)(state, ev)
+      case ev: (RoutingStarted | RoutingStopped | SOSAlertTriggered | SOSAlertStopped) => Effect.persist(ev)
+      case _ => Effect.none
 
-  private val routingHandler: (State, RoutingStarted | RoutingStopped) => Effect[DrivingEvent, State] =
-    (_, event) => Effect.persist(event)
-
-  private val sosHandler: (State, SOSAlertTriggered) => Effect[DrivingEvent, State] =
-    (_, event) => Effect.persist(event)
+  import cats. effect. unsafe. implicits. global
 
   private def trackingHandler(ctx: ActorContext[Command]): (State, SampledLocation) => Effect[DrivingEvent, State] =
     (state, event) =>
       state match
-        case State(Routing, Some(tracking), _) =>
-//          ctx.pipeToSelf(reaction(tracking, event).unsafeToFuture()):
-//            case Success(result) => reactionHandler(ctx)(event)(result)
-//            case Failure(exception) =>
-//              ctx.log.error(exception.getMessage)
-//              Ignore
+        case State(Routing, Some(tracking), _) if tracking.isInstanceOf[MonitorableTracking] =>
+          ctx.pipeToSelf(reaction(tracking.asInstanceOf[MonitorableTracking], event).unsafeToFuture()):
+            case Success(result) => reactionHandler(ctx)(event)(result)
+            case Failure(exception) =>
+              ctx.log.error(exception.getMessage)
+              Ignore
           ctx.log.debug("Routing...")
           Effect.persist(event)
         case _ => Effect.persist(event)
 
-//  private def reaction(tracking: Tracking, event: SampledLocation) =
-//    for
-//      config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
-//      checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
-//      result <- checks(tracking, event).value.run(config)
-//    yield result.flatten
+  private def reaction(tracking: MonitorableTracking, event: SampledLocation) =
+    for
+      config <- MapboxConfigurationProvider("MAPBOX_API_KEY").configuration
+      checks = ArrivalCheck(MapboxService()) >>> StationaryCheck() >>> ArrivalTimeoutCheck()
+      result <- checks(tracking, event).value.run(config)
+    yield result.flatten
 
-//  private def reactionHandler(ctx: ActorContext[Command])(event: Event)(
-//      result: Either[java.io.Serializable, TrackingEventReaction.Continue.type],
-//  ): Command = result match
-//    case Right(_) =>
-//      ctx.log.debug("Routing continuing...")
-//      Ignore
-//    case Left(Notification.Alert(msg)) =>
-//      ctx.log.debug(msg)
-//      Ignore
-//    case Left(Notification.Success(msg)) =>
-//      ctx.log.debug(msg)
-//      RoutingStopped(event.timestamp, event.user)
-//    case Left(e) =>
-//      ctx.log.error(e.toString)
-//      Ignore
+  private def reactionHandler(ctx: ActorContext[Command])(event: Event)(
+      result: Either[java.io.Serializable, TrackingEventReaction.Continue.type],
+  ): Command = result match
+    case Right(_) =>
+      ctx.log.debug("Routing continuing...")
+      Ignore
+    case Left(Notification.Alert(msg)) =>
+      ctx.log.debug(msg)
+      Ignore
+    case Left(Notification.Success(msg)) =>
+      ctx.log.debug(msg)
+      RoutingStopped(event.timestamp, event.user)
+    case Left(e) =>
+      ctx.log.error(e.toString)
+      Ignore

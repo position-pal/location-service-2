@@ -8,12 +8,14 @@ trait Tracking:
   def route: Route
   def user: UserId
   def addSample(sample: SampledLocation): Tracking
+  def +(sample: SampledLocation): Tracking = addSample(sample)
 
 trait MonitorableTracking extends Tracking:
   def mode: RoutingMode
   def destination: GPSLocation
   def expectedArrival: Date
   override def addSample(sample: SampledLocation): MonitorableTracking
+  override def +(sample: SampledLocation): MonitorableTracking = addSample(sample)
 
 /** The mode of routing to a destination. */
 enum RoutingMode:

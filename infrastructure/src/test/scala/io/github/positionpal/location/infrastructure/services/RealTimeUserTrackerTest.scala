@@ -12,23 +12,19 @@ import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.wordspec.AnyWordSpecLike
+import io.github.positionpal.location.domain.EventConversions.toMonitorableTracking
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
     with AnyWordSpecLike
     with BeforeAndAfterEach:
 
-  private val eventSourcedTestKit =
-    EventSourcedBehaviorTestKit[RealTimeUserTracker.Command, RealTimeUserTracker.Event, RealTimeUserTracker.State](
-      system,
-      RealTimeUserTracker("testUser"),
-    )
+  private val eventSourcedTestKit = EventSourcedBehaviorTestKit[Command, Event, State](system, RealTimeUserTracker("testUser"))
+  private val testUser = UserId("user-test")
 
   override protected def beforeEach(): Unit =
     super.beforeEach()
     eventSourcedTestKit.clear()
-
-  private val testUser = UserId("user-test")
 
   "RealTimeUserTracker" when:
     "initialized" should:
@@ -44,20 +40,9 @@ class RealTimeUserTrackerTest
       "transition to routing mode if a routing is started" in:
         val lastSample = SampledLocation(now, testUser, cesenaCampusLocation)
         eventSourcedTestKit.runCommand(lastSample)
-        val routingStarted = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
-        eventSourcedTestKit.runCommand(routingStarted).events should contain only routingStarted
-        eventSourcedTestKit.getState() shouldMatch (
-          Routing,
-          Some(
-            Tracking.withMonitoring(
-              routingStarted.user,
-              routingStarted.mode,
-              routingStarted.destination,
-              routingStarted.expectedArrival,
-            ),
-          ),
-          Some(lastSample),
-        )
+        val routingEvent = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
+        eventSourcedTestKit.runCommand(routingEvent).events should contain only routingEvent
+        eventSourcedTestKit.getState() shouldMatch (Routing, Some(routingEvent.toMonitorableTracking), Some(lastSample))
 
       "transition to sos mode if an sos alert is triggered" in:
         val sosTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
@@ -73,14 +58,17 @@ class RealTimeUserTrackerTest
 
     "in routing state" should:
       "track the user position" ignore:
-        val trace = SampledLocation(now, testUser, GPSLocation(44.139, 12.243))
-          :: SampledLocation(now, testUser, GPSLocation(44.140, 12.244))
-          :: SampledLocation(now, testUser, GPSLocation(44.141, 12.245))
+        val trace = SampledLocation(now, testUser, GPSLocation(44, 12))
+          :: SampledLocation(now, testUser, GPSLocation(43, 13))
+          :: SampledLocation(now, testUser, GPSLocation(42, 14))
           :: Nil
         eventSourcedTestKit.runCommand(RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture))
-        trace.foreach(eventSourcedTestKit.runCommand(_))
-        println(eventSourcedTestKit.getState())
-        Thread.sleep(5_000)
+        trace.reverse.foreach(eventSourcedTestKit.runCommand(_))
+        eventSourcedTestKit.getState() shouldMatch (
+          Routing,
+          Some(Tracking.withMonitoring(testUser, Driving, cesenaCampusLocation, inTheFuture, trace)),
+          Some(trace.last)
+        )
 
   extension (s: State)
     infix def shouldMatch(userState: UserState, route: Option[Tracking], lastSample: Option[SampledLocation]): Unit =
